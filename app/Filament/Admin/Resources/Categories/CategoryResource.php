@@ -21,12 +21,16 @@ class CategoryResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return CategoryForm::configure($schema);
+        return $schema
+            ->schema(CategoryForm::configure());
     }
 
     public static function table(Table $table): Table
     {
-        return CategoriesTable::configure($table);
+        return $table
+            ->columns(CategoriesTable::getColumns())
+            ->actions(CategoriesTable::getRecordActions())
+            ->bulkActions(CategoriesTable::getBulkActions());
     }
 
     public static function getRelations(): array

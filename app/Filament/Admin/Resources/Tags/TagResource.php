@@ -21,12 +21,15 @@ class TagResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return TagForm::configure($schema);
+        return $schema->schema(TagForm::configure());
     }
 
     public static function table(Table $table): Table
     {
-        return TagsTable::configure($table);
+        return $table
+            ->columns(TagsTable::getColumns())
+            ->actions(TagsTable::getRecordActions())
+            ->bulkActions(TagsTable::getBulkActions());
     }
 
     public static function getRelations(): array

@@ -21,12 +21,15 @@ class PostResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return PostForm::configure($schema);
+        return $schema->schema(PostForm::configure());
     }
 
     public static function table(Table $table): Table
     {
-        return PostsTable::configure($table);
+        return $table
+            ->columns(PostsTable::getColumns())
+            ->actions(PostsTable::getRecordActions())
+            ->bulkActions(PostsTable::getBulkActions());
     }
 
     public static function getRelations(): array
