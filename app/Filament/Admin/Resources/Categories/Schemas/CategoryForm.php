@@ -2,18 +2,18 @@
 
 namespace App\Filament\Admin\Resources\Categories\Schemas;
 
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
-use Filament\Schemas\Components\Toggle;
-use Filament\Schemas\Components\Textarea;
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Schema;
 
 class CategoryForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->components([
+            ->schema([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)

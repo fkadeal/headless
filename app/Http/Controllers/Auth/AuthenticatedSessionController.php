@@ -14,6 +14,14 @@ use Illuminate\Validation\ValidationException;
 class AuthenticatedSessionController extends Controller
 {
     /**
+     * Display the login view.
+     */
+    public function create()
+    {
+        return view('auth.login');
+    }
+
+    /**
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): Response
@@ -55,7 +63,7 @@ class AuthenticatedSessionController extends Controller
             // For web requests (like Filament), use the normal authentication flow
             $request->authenticate();
             $request->session()->regenerate();
-            return response()->noContent();
+            return response('', 204); // Return a proper Response instance instead of noContent()
         }
     }
 
