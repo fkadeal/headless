@@ -2,36 +2,32 @@
 
 namespace App\Filament\Admin\Resources\Tags\Schemas;
 
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
-use Filament\Schemas\Components\Textarea;
-use Filament\Schemas\Schema;
+namespace App\Filament\Admin\Resources\Tags\Schemas;
 
 class TagForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(): array
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Tag Name'),
-                
-                TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true)
-                    ->label('Slug'),
-                
-                Textarea::make('description')
-                    ->maxLength(65535)
-                    ->label('Description'),
-                
-                Select::make('created_by')
-                    ->relationship('creator', 'name')
-                    ->required()
-                    ->label('Created By'),
-            ]);
+        return [
+            \Filament\Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255)
+                ->label('Tag Name'),
+            
+            \Filament\Forms\Components\TextInput::make('slug')
+                ->required()
+                ->maxLength(255)
+                ->unique(ignoreRecord: true)
+                ->label('Slug'),
+            
+            \Filament\Forms\Components\Textarea::make('description')
+                ->maxLength(65535)
+                ->label('Description'),
+            
+            \Filament\Forms\Components\Select::make('created_by')
+                ->relationship('creator', 'name')
+                ->required()
+                ->label('Created By'),
+        ];
     }
 }

@@ -43,4 +43,13 @@ class Category extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    protected static function booted()
+{
+    static::creating(function ($category) {
+        if (empty($category->created_by)) {
+            $category->created_by = auth()->id();
+        }
+    });
+}
 }
