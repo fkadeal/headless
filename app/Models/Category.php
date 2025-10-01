@@ -18,6 +18,7 @@ class Category extends Model
         'parent_id',
         'created_by',
         'is_active',
+        'thumbnail',
     ];
 
     protected $casts = [

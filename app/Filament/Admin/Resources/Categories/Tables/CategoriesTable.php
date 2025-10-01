@@ -4,6 +4,8 @@ namespace App\Filament\Admin\Resources\Categories\Tables;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Columns\ImageColumn;
+
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkAction;
@@ -16,6 +18,9 @@ class CategoriesTable
             TextColumn::make('name')
                 ->searchable()
                 ->sortable(),
+
+            ImageColumn::make('thumbnail')
+                ->label('Thumbnail'),
             TextColumn::make('slug')
                 ->searchable()
                 ->sortable(),

@@ -23,6 +23,7 @@ class Post extends Model
         'published_at',
         'featured_image',
         'meta_data',
+        'thumbnail',
     ];
 
     protected $casts = [

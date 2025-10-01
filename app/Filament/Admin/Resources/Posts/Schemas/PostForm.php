@@ -45,6 +45,11 @@ class PostForm
             \Filament\Forms\Components\Toggle::make('is_active')
                 ->label('Is Active')
                 ->default(true),
+
+            \Filament\Forms\Components\FileUpload::make('thumbnail')
+                ->image()
+                ->nullable()
+                ->label('Thumbnail'),
         ];
     }
 }
