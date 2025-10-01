@@ -48,8 +48,10 @@ class PostForm
 
             \Filament\Forms\Components\FileUpload::make('thumbnail')
                 ->image()
+                ->disk('public')        
+                ->directory('thumbnails')
                 ->nullable()
-                ->label('Thumbnail'),
+                ->label('Thumbnail')
         ];
     }
 }
