@@ -17,6 +17,9 @@ class PostController extends Controller
     public function index(Request $request): JsonResponse
     {
         $posts = Post::with(['category', 'author'])
+            ->whereHas('category', function ($query) {
+                $query->where('name', '!=', 'Page');
+            })
             ->when($request->search, function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
                       ->orWhere('content', 'like', "%{$search}%");

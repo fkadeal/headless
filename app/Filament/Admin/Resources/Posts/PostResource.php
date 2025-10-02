@@ -32,6 +32,13 @@ class PostResource extends Resource
             ->bulkActions(PostsTable::getBulkActions());
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->whereHas('category', function ($query) {
+            $query->where('name', '!=', 'Page');
+        });
+    }
+
     public static function getRelations(): array
     {
         return [
