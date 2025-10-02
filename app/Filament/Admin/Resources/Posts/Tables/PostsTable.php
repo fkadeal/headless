@@ -17,9 +17,11 @@ class PostsTable
             TextColumn::make('title')
                 ->searchable()
                 ->sortable(),
-            
+             
             ImageColumn::make('thumbnail')
-                ->label('Thumbnail'),
+                ->label('Thumbnail')
+                ->circular()
+                ->disk('public'),
             TextColumn::make('slug')
                 ->searchable()
                 ->sortable(),
