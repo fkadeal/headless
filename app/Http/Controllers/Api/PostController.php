@@ -16,27 +16,59 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $posts = Post::with(['category', 'author'])
+        $query = Post::with(['category', 'author', 'tags'])
             ->whereHas('category', function ($query) {
                 $query->where('name', '!=', 'Page');
+            });
+
+        // Apply filters if present
+        $filters = $request->query('filters', []);
+        if (!empty($filters)) {
+            $query->filter($filters);
+        } else {
+            // Maintain existing behavior for backward compatibility
+            $query->when($request->search, function ($q, $search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
             })
-            ->when($request->search, function ($query, $search) {
-                $query->where('title', 'like', "%{$search}%")
-                      ->orWhere('content', 'like', "%{$search}%");
+            ->when($request->category, function ($q, $category) {
+                $q->where('category_id', $category);
             })
-            ->when($request->category, function ($query, $category) {
-                $query->where('category_id', $category);
-            })
-            ->when($request->published, function ($query) {
-                $query->where('is_published', true);
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate($request->per_page ?? 15);
+            ->when($request->published, function ($q) {
+                $q->where('is_published', true);
+            });
+        }
+
+        // Apply sorting if present in filters or as query param
+        $sort = $request->query('sort');
+        if ($sort) {
+            $this->applySorting($query, $sort);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $posts = $query->paginate($request->per_page ?? 15);
 
         return response()->json([
             'success' => true,
             'data' => $posts,
         ]);
+    }
+
+    /**
+     * Apply sorting to the query.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $sort
+     * @return void
+     */
+    protected function applySorting($query, $sort)
+    {
+        foreach (explode(',', $sort) as $sortItem) {
+            $direction = str_starts_with($sortItem, '-') ? 'desc' : 'asc';
+            $field = ltrim($sortItem, '-');
+            $query->orderBy($field, $direction);
+        }
     }
 
     /**

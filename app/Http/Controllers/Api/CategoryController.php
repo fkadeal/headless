@@ -16,24 +16,56 @@ class CategoryController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $categories = Category::with(['parent', 'creator'])
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+        $query = Category::with(['parent', 'creator']);
+
+        // Apply filters if present
+        $filters = $request->query('filters', []);
+        if (!empty($filters)) {
+            $query->filter($filters);
+        } else {
+            // Maintain existing behavior for backward compatibility
+            $query->when($request->search, function ($q, $search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             })
-            ->when($request->parent_id, function ($query, $parentId) {
-                $query->where('parent_id', $parentId);
+            ->when($request->parent_id, function ($q, $parentId) {
+                $q->where('parent_id', $parentId);
             })
-            ->when($request->active, function ($query) {
-                $query->where('is_active', true);
-            })
-            ->orderBy('name')
-            ->paginate($request->per_page ?? 15);
+            ->when($request->active, function ($q) {
+                $q->where('is_active', true);
+            });
+        }
+
+        // Apply sorting if present in filters or as query param
+        $sort = $request->query('sort');
+        if ($sort) {
+            $this->applySorting($query, $sort);
+        } else {
+            $query->orderBy('name');
+        }
+
+        $categories = $query->paginate($request->per_page ?? 15);
 
         return response()->json([
             'success' => true,
             'data' => $categories,
         ]);
+    }
+
+    /**
+     * Apply sorting to the query.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $sort
+     * @return void
+     */
+    protected function applySorting($query, $sort)
+    {
+        foreach (explode(',', $sort) as $sortItem) {
+            $direction = str_starts_with($sortItem, '-') ? 'desc' : 'asc';
+            $field = ltrim($sortItem, '-');
+            $query->orderBy($field, $direction);
+        }
     }
 
     /**

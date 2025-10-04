@@ -16,18 +16,50 @@ class TagController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $tags = Tag::with('creator')
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-            })
-            ->orderBy('name')
-            ->paginate($request->per_page ?? 15);
+        $query = Tag::with('creator');
+
+        // Apply filters if present
+        $filters = $request->query('filters', []);
+        if (!empty($filters)) {
+            $query->filter($filters);
+        } else {
+            // Maintain existing behavior for backward compatibility
+            $query->when($request->search, function ($q, $search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply sorting if present in filters or as query param
+        $sort = $request->query('sort');
+        if ($sort) {
+            $this->applySorting($query, $sort);
+        } else {
+            $query->orderBy('name');
+        }
+
+        $tags = $query->paginate($request->per_page ?? 15);
 
         return response()->json([
             'success' => true,
             'data' => $tags,
         ]);
+    }
+
+    /**
+     * Apply sorting to the query.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $sort
+     * @return void
+     */
+    protected function applySorting($query, $sort)
+    {
+        foreach (explode(',', $sort) as $sortItem) {
+            $direction = str_starts_with($sortItem, '-') ? 'desc' : 'asc';
+            $field = ltrim($sortItem, '-');
+            $query->orderBy($field, $direction);
+        }
     }
 
     /**

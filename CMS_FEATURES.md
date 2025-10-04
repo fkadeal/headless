@@ -45,14 +45,17 @@ This document outlines the CMS features implemented in the headless CMS applicat
 ## API Endpoints
 
 ### Public Endpoints (No Authentication Required)
-- `GET /api/posts` - List posts with filtering and pagination
+- `GET /api/posts` - List posts with advanced filtering and pagination
   - Query params: `search`, `category`, `published`, `per_page`
+  - Advanced filtering: `filters[field][operator]=value`
 - `GET /api/posts/{post}` - Get single post with relationships
-- `GET /api/categories` - List categories with filtering and pagination
+- `GET /api/categories` - List categories with advanced filtering and pagination
   - Query params: `search`, `parent_id`, `active`, `per_page`
+  - Advanced filtering: `filters[field][operator]=value`
 - `GET /api/categories/{category}` - Get single category with relationships
-- `GET /api/tags` - List tags with filtering and pagination
+- `GET /api/tags` - List tags with advanced filtering and pagination
   - Query params: `search`, `per_page`
+  - Advanced filtering: `filters[field][operator]=value`
 - `GET /api/tags/{tag}` - Get single tag with relationships
 
 ### Protected Endpoints (Authentication Required)
@@ -119,6 +122,70 @@ The application uses Laravel Sanctum for token-based authentication:
 - The admin panel uses session-based authentication
 - Rate limiting is implemented for login attempts
 
+## Advanced Filtering
+
+The API supports advanced filtering through a flexible query syntax:
+
+### Basic Structure
+Use a filters object in the query string:
+```
+GET /posts?filters[field][operator]=value
+```
+
+### Supported Operators
+- `eq` - Equal to (e.g., `filters[status][eq]=published`)
+- `ne` - Not equal (e.g., `filters[status][ne]=draft`)
+- `gt` - Greater than (e.g., `filters[views][gt]=1000`)
+- `gte` - Greater than or equal (e.g., `filters[views][gte]=1000`)
+- `lt` - Less than (e.g., `filters[views][lt]=500`)
+- `lte` - Less than or equal (e.g., `filters[views][lte]=500`)
+- `contains` - Text contains (e.g., `filters[title][contains]=laravel`)
+- `in` - Value in array (e.g., `filters[status][in]=published,draft`)
+- `nin` - Value not in array (e.g., `filters[status][nin]=archived,trashed`)
+
+### Examples
+
+#### Single filter
+```
+GET /posts?filters[status][eq]=published
+```
+
+#### Multiple filters (AND by default)
+```
+GET /posts?filters[status][eq]=published&filters[views][gt]=1000
+```
+
+#### OR conditions
+```
+GET /posts?filters[or][0][status][eq]=draft&filters[or][1][status][eq]=archived
+```
+
+#### Nested relation filtering
+By category:
+```
+GET /posts?filters[category][slug][eq]=tech
+```
+
+By tags:
+```
+GET /posts?filters[tags][slug][in]=laravel,php
+```
+
+#### Search
+```
+GET /posts?filters[search]=laravel cms
+```
+
+#### Sorting
+```
+GET /posts?sort=-views,title
+```
+
+#### Pagination
+```
+GET /posts?page=2&per_page=20
+```
+
 ## Usage Examples
 
 ### API Usage
@@ -140,8 +207,14 @@ curl -X POST http://localhost:8000/api/posts \
   -H "Content-Type: application/json" \
   -d '{"title":"My Post","slug":"my-post","content":"Post content","category_id":1,"is_published":true}'
 
-# Get posts (no authentication required)
-curl http://localhost:8000/api/posts
+# Get posts with advanced filtering (no authentication required)
+curl "http://localhost:8000/api/posts?filters[status][eq]=published&filters[views][gt]=1000"
+
+# Get posts with relation filtering
+curl "http://localhost:8000/api/posts?filters[category][slug][eq]=tech"
+
+# Get posts with search and sorting
+curl "http://localhost:8000/api/posts?filters[search]=laravel&sort=-created_at"
 ```
 
 ### Admin Panel
