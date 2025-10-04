@@ -1,0 +1,715 @@
+{
+  "info": {
+    "_postman_id": "8f3d5786-5e0d-43c6-91ec-1b540305525d",
+    "name": "Laravel Headless CMS API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for Laravel Headless CMS with advanced filtering capabilities"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "id": "login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "login"]
+            },
+            "description": "Login to get access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "id": "register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{name}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"password_confirmation\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "register"]
+            },
+            "description": "Register a new user"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "id": "logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logout"]
+            },
+            "description": "Logout and revoke token"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User",
+          "id": "get-user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user"]
+            },
+            "description": "Get authenticated user information"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public Endpoints",
+      "item": [
+        {
+          "name": "Get Posts",
+          "id": "get-posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"]
+            },
+            "description": "Get all posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with Filters",
+          "id": "get-posts-filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[status][eq]=published&filters[views][gt]=1000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[status][eq]",
+                  "value": "published"
+                },
+                {
+                  "key": "filters[views][gt]",
+                  "value": "1000"
+                }
+              ]
+            },
+            "description": "Get posts with advanced filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with OR Conditions",
+          "id": "get-posts-or-conditions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[or][0][status][eq]=draft&filters[or][1][status][eq]=archived",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[or][0][status][eq]",
+                  "value": "draft"
+                },
+                {
+                  "key": "filters[or][1][status][eq]",
+                  "value": "archived"
+                }
+              ]
+            },
+            "description": "Get posts with OR conditions filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts by Category",
+          "id": "get-posts-by-category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[category][slug][eq]=tech",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[category][slug][eq]",
+                  "value": "tech"
+                }
+              ]
+            },
+            "description": "Get posts filtered by category"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with Tags",
+          "id": "get-posts-with-tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[tags][slug][in]=laravel,php",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[tags][slug][in]",
+                  "value": "laravel,php"
+                }
+              ]
+            },
+            "description": "Get posts filtered by tags"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with Search",
+          "id": "get-posts-search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[search]=laravel cms",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[search]",
+                  "value": "laravel cms"
+                }
+              ]
+            },
+            "description": "Get posts with search functionality"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with Sorting",
+          "id": "get-posts-sorting",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?sort=-views,title",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "-views,title"
+                }
+              ]
+            },
+            "description": "Get posts with sorting"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with Pagination",
+          "id": "get-posts-pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?page=2&per_page=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get posts with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Post",
+          "id": "get-single-post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{postId}}"]
+            },
+            "description": "Get a single post by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories",
+          "id": "get-categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            },
+            "description": "Get all categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories with Filters",
+          "id": "get-categories-filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?filters[is_active][eq]=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"],
+              "query": [
+                {
+                  "key": "filters[is_active][eq]",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get categories with filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Category",
+          "id": "get-single-category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            },
+            "description": "Get a single category by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tags",
+          "id": "get-tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags"]
+            },
+            "description": "Get all tags"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tags with Filters",
+          "id": "get-tags-filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags?filters[search]=laravel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags"],
+              "query": [
+                {
+                  "key": "filters[search]",
+                  "value": "laravel"
+                }
+              ]
+            },
+            "description": "Get tags with filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Tag",
+          "id": "get-single-tag",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/{{tagId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "{{tagId}}"]
+            },
+            "description": "Get a single tag by ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Protected Endpoints",
+      "item": [
+        {
+          "name": "Create Post",
+          "id": "create-post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Sample Post\",\n    \"slug\": \"sample-post\",\n    \"content\": \"This is the content of the sample post.\",\n    \"excerpt\": \"Excerpt of the post\",\n    \"category_id\": 1,\n    \"is_published\": true,\n    \"featured_image\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"]
+            },
+            "description": "Create a new post"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Post",
+          "id": "update-post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Post Title\",\n    \"is_published\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{postId}}"]
+            },
+            "description": "Update an existing post"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "id": "delete-post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{postId}}"]
+            },
+            "description": "Delete a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "id": "create-category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Technology\",\n    \"slug\": \"technology\",\n    \"description\": \"Posts about technology\",\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            },
+            "description": "Create a new category"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "id": "update-category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Technology\",\n    \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            },
+            "description": "Update an existing category"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "id": "delete-category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            },
+            "description": "Delete a category"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Tag",
+          "id": "create-tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Laravel\",\n    \"slug\": \"laravel\",\n    \"description\": \"Posts about Laravel framework\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags"]
+            },
+            "description": "Create a new tag"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Tag",
+          "id": "update-tag",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Laravel\",\n    \"description\": \"Posts about the updated Laravel framework\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/{{tagId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "{{tagId}}"]
+            },
+            "description": "Update an existing tag"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Tag",
+          "id": "delete-tag",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tags/{{tagId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tags", "{{tagId}}"]
+            },
+            "description": "Delete a tag"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "id": "baseUrl",
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "id": "email",
+      "key": "email",
+      "value": "test@example.com",
+      "type": "string"
+    },
+    {
+      "id": "password",
+      "key": "password",
+      "value": "password",
+      "type": "string"
+    },
+    {
+      "id": "name",
+      "key": "name",
+      "value": "Test User",
+      "type": "string"
+    },
+    {
+      "id": "token",
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "postId",
+      "key": "postId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "id": "categoryId",
+      "key": "categoryId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "id": "tagId",
+      "key": "tagId",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
