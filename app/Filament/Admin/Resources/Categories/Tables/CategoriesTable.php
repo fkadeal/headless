@@ -20,7 +20,9 @@ class CategoriesTable
                 ->sortable(),
 
             ImageColumn::make('thumbnail')
-                ->label('Thumbnail'),
+                ->label('Thumbnail')
+                ->circular()
+                ->disk('public'),
             TextColumn::make('slug')
                 ->searchable()
                 ->sortable(),

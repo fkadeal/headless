@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 use App\Traits\Filterable;
 
 class Tag extends Model
@@ -25,6 +26,23 @@ class Tag extends Model
         'slug',
         'description',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($tag) {
+            if (empty($tag->slug)) {
+                $tag->slug = Str::slug($tag->name);
+            }
+        });
+        
+        static::updating(function ($tag) {
+            if (empty($tag->slug) || $tag->isDirty('name')) {
+                $tag->slug = Str::slug($tag->name);
+            }
+        });
+    }
 
     public function posts(): BelongsToMany
     {

@@ -16,10 +16,10 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Post::with(['category', 'author', 'tags'])
-            ->whereHas('category', function ($query) {
-                $query->where('name', '!=', 'Page');
-            });
+        $query = Post::with(['category', 'author', 'tags']);
+            // ->whereHas('category', function ($query) {
+            //     $query->where('name', '!=', 'Page');
+            // });
 
         // Apply filters if present
         $filters = $request->query('filters', []);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use App\Traits\Filterable;
 
 class Post extends Model
@@ -40,6 +41,23 @@ class Post extends Model
         'excerpt',
         'slug',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($post) {
+            if (empty($post->slug)) {
+                $post->slug = Str::slug($post->title);
+            }
+        });
+        
+        static::updating(function ($post) {
+            if (empty($post->slug) || $post->isDirty('title')) {
+                $post->slug = Str::slug($post->title);
+            }
+        });
+    }
 
     public function category(): BelongsTo
     {

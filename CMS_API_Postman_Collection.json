@@ -176,12 +176,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/posts?filters[category][slug][eq]=tech",
+              "raw": "{{baseUrl}}/api/posts?filters[category.slug][eq]=tech",
               "host": ["{{baseUrl}}"],
               "path": ["api", "posts"],
               "query": [
                 {
-                  "key": "filters[category][slug][eq]",
+                  "key": "filters[category.slug][eq]",
                   "value": "tech"
                 }
               ]
@@ -197,12 +197,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/posts?filters[tags][slug][in]=laravel,php",
+              "raw": "{{baseUrl}}/api/posts?filters[tags.slug][in]=laravel,php",
               "host": ["{{baseUrl}}"],
               "path": ["api", "posts"],
               "query": [
                 {
-                  "key": "filters[tags][slug][in]",
+                  "key": "filters[tags.slug][in]",
                   "value": "laravel,php"
                 }
               ]
@@ -394,6 +394,52 @@
             "description": "Get a single tag by ID"
           },
           "response": []
+        },
+        {
+          "name": "Get Pages",
+          "id": "get-pages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[category.name][eq]=Page",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[category.name][eq]",
+                  "value": "Page"
+                }
+              ]
+            },
+            "description": "Get all pages (posts in 'Page' category)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pages with Filters",
+          "id": "get-pages-filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?filters[category.name][eq]=Page&filters[is_published][eq]=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "filters[category.name][eq]",
+                  "value": "Page"
+                },
+                {
+                  "key": "filters[is_published][eq]",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get pages with additional filters"
+          },
+          "response": []
         }
       ]
     },
@@ -419,14 +465,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"title\": \"Sample Post\",\n    \"slug\": \"sample-post\",\n    \"content\": \"This is the content of the sample post.\",\n    \"excerpt\": \"Excerpt of the post\",\n    \"category_id\": 1,\n    \"is_published\": true,\n    \"featured_image\": null\n}"
+              "raw": "{\n    \"title\": \"Sample Post\",\n    \"content\": \"This is the content of the sample post.\",\n    \"excerpt\": \"Excerpt of the post\",\n    \"category_id\": 1,\n    \"is_published\": true,\n    \"featured_image\": null\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/posts",
               "host": ["{{baseUrl}}"],
               "path": ["api", "posts"]
             },
-            "description": "Create a new post"
+            "description": "Create a new post - slug will be auto-generated from title if not provided"
           },
           "response": []
         },
@@ -456,7 +502,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "posts", "{{postId}}"]
             },
-            "description": "Update an existing post"
+            "description": "Update an existing post - slug will be auto-updated from title if title changes and slug wasn't manually set"
           },
           "response": []
         },
@@ -500,14 +546,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Technology\",\n    \"slug\": \"technology\",\n    \"description\": \"Posts about technology\",\n    \"is_active\": true\n}"
+              "raw": "{\n    \"name\": \"Technology\",\n    \"description\": \"Posts about technology\",\n    \"is_active\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/categories",
               "host": ["{{baseUrl}}"],
               "path": ["api", "categories"]
             },
-            "description": "Create a new category"
+            "description": "Create a new category - slug will be auto-generated from name if not provided"
           },
           "response": []
         },
@@ -537,7 +583,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "categories", "{{categoryId}}"]
             },
-            "description": "Update an existing category"
+            "description": "Update an existing category - slug will be auto-updated from name if name changes and slug wasn't manually set"
           },
           "response": []
         },
@@ -581,14 +627,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Laravel\",\n    \"slug\": \"laravel\",\n    \"description\": \"Posts about Laravel framework\"\n}"
+              "raw": "{\n    \"name\": \"Laravel\",\n    \"description\": \"Posts about Laravel framework\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/tags",
               "host": ["{{baseUrl}}"],
               "path": ["api", "tags"]
             },
-            "description": "Create a new tag"
+            "description": "Create a new tag - slug will be auto-generated from name if not provided"
           },
           "response": []
         },
@@ -618,7 +664,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "tags", "{{tagId}}"]
             },
-            "description": "Update an existing tag"
+            "description": "Update an existing tag - slug will be auto-updated from name if name changes and slug wasn't manually set"
           },
           "response": []
         },

@@ -6,6 +6,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
+
+use Illuminate\Support\Str;
 
 class CategoryForm
 {
@@ -17,11 +20,9 @@ class CategoryForm
                 ->maxLength(255)
                 ->label('Category Name')
                 ->live(onBlur: true)
-                ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                    // Auto-update slug if it matches old slug
-                    $oldSlug = $get('slug');
-                    if ($oldSlug === \Illuminate\Support\Str::slug($get('name'))) {
-                        $set('slug', \Illuminate\Support\Str::slug($state));
+                ->afterStateUpdated(function (callable $set, ?string $state, ?string $old) {
+                    if (($old ?? '') !== Str::slug($state)) {
+                        $set('slug', Str::slug($state));
                     }
                 }),
             
@@ -43,9 +44,11 @@ class CategoryForm
                 ->label('Is Active')
                 ->default(true),
 
-            \Filament\Forms\Components\FileUpload::make('thumbnail')
+            FileUpload::make('thumbnail')
                 ->image()
                 ->nullable()
+                ->disk('public')        
+                ->directory('thumbnails')
                 ->label('Thumbnail'),
         ];
     }
