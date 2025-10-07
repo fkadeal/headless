@@ -66,14 +66,14 @@ class PostForm
                 ->label('Is Active')
                 ->columns(1 / 2)
                 ->default(true),
-            // RichEditor::make('content')
-            //     ->required()
-            //     ->columnSpan(2)
-            //     ->label('Content'),
-            Ckeditor::make('content')
+            RichEditor::make('content')
                 ->required()
-                ->columnSpanFull()
+                ->columnSpan(2)
                 ->label('Content'),
+            // Ckeditor::make('content')
+            //     ->required()
+            //     ->columnSpanFull()
+            //     ->label('Content'),
             // TinyMCEEditor::make('content')
             //     ->label('Content')
             //     ->required()

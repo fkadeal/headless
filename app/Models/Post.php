@@ -23,6 +23,7 @@ class Post extends Model
         'created_by',
         'is_published',
         'published_at',
+        'is_active',
         'featured_image',
         'meta_data',
         'thumbnail',
@@ -31,6 +32,7 @@ class Post extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'is_published' => 'boolean',
+        'is_active' => 'boolean',
         'meta_data' => 'array',
     ];
 
