@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Posts\Schemas;
 
-namespace App\Filament\Admin\Resources\Posts\Schemas;
+use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 
 class PostForm
 {
@@ -24,9 +24,11 @@ class PostForm
                 ->maxLength(65535)
                 ->label('Excerpt'),
             
-            \Filament\Forms\Components\RichEditor::make('content')
-                ->required()
-                ->label('Content'),
+            TinyEditor::make('content')
+                ->profile('full')
+                ->fileAttachmentsDisk('public')
+                ->fileAttachmentsDirectory('uploads')
+                ->required(),
             
             \Filament\Forms\Components\Select::make('category_id')
                 ->relationship('category', 'name')

@@ -15,6 +15,7 @@
     ],
     "require": {
         "php": "^8.2",
+        "amidesfahani/filament-tinyeditor": "^4.0",
         "filament/filament": "^4.1",
         "filament/forms": "^4.0",
         "filament/tables": "^4.1",
