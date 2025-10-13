@@ -114,6 +114,17 @@ The CMS includes a complete Filament admin panel with the following resources:
 - Table columns: Name, slug, created by, created at
 - Navigation icon: Tag
 
+### TinyEditor Integration
+
+The default `RichEditor` has been replaced with the more powerful `TinyEditor` (`amidesfahani/filament-tinyeditor`) for the `content` field in the Post Resource.
+
+Key features of this integration include:
+
+- **Full-featured WYSIWYG editor**: The editor is configured with the `full` profile, providing a comprehensive set of tools for content creation, including text formatting, lists, tables, and more.
+- **File Attachments**: The editor is configured to handle file and image uploads directly.
+  - Files are stored on the `public` disk.
+  - Uploads are placed in the `uploads` directory within the public storage.
+
 ## Authentication System
 
 The application uses Laravel Sanctum for token-based authentication:
