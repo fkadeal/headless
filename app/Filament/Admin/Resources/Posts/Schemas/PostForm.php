@@ -24,11 +24,7 @@ class PostForm
                 ->maxLength(65535)
                 ->label('Excerpt'),
             
-            TinyEditor::make('content')
-                ->profile('full')
-                ->fileAttachmentsDisk('public')
-                ->fileAttachmentsDirectory('uploads')
-                ->required(),
+            
             
             \Filament\Forms\Components\Select::make('category_id')
                 ->relationship('category', 'name')
@@ -46,14 +42,20 @@ class PostForm
             
             \Filament\Forms\Components\Toggle::make('is_active')
                 ->label('Is Active')
-                ->default(true),
+                ->default(true), 
+            TinyEditor::make('content')
+                ->profile('full')
+                ->columnSpanFull()
+                ->fileAttachmentsDisk('public')
+                ->fileAttachmentsDirectory('uploads')
+                ->required(),
 
             \Filament\Forms\Components\FileUpload::make('thumbnail')
                 ->image()
                 ->disk('public')        
                 ->directory('thumbnails')
                 ->nullable()
-                ->label('Thumbnail')
+                ->label('Thumbnail'),
         ];
     }
 }

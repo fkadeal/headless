@@ -104,7 +104,7 @@ The CMS includes a complete Filament admin panel with the following resources:
 
 ### Post Resource
 - Create, read, update, delete operations
-- Form fields: Title, slug, excerpt, content (Rich Editor), category, author, published status
+- Form fields: Title, slug, excerpt, content (TinyEditor), category, author, published status
 - Table columns: Title, slug, category, author, published status, created at
 - Navigation icon: Document text
 
