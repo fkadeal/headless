@@ -7,6 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Models\Voting;
 
 class CustomStatsOverview extends BaseWidget
 {
@@ -24,6 +25,18 @@ class CustomStatsOverview extends BaseWidget
             Stat::make('Total Users', User::count())
                 ->description('All registered users')
                 ->color('warning'),
+
+            Stat::make('Total Votes', Voting::count())
+                ->description('All votes casted')
+                ->color('info'),
+
+            Stat::make('Posts with Votes', Post::whereHas('votes')->count())
+                ->description('Posts that have received at least one vote')
+                ->color('success'),
+
+            Stat::make('Active Voters', Voting::select('user_id')->distinct()->whereNotNull('user_id')->count())
+                ->description('Unique logged-in users who voted')
+                ->color('secondary'),
         ];
     }
 }

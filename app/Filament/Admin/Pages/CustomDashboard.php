@@ -24,5 +24,13 @@ class CustomDashboard extends Page
              \App\Filament\Admin\Widgets\CustomStatsOverview::class,
         ];
     }
- 
+
+    public function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Admin\Widgets\VotingAnalyticsChart::class,
+            \App\Filament\Admin\Widgets\TopVotedPostsChart::class,
+        ];
+    }
+
 }

@@ -50,6 +50,14 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Get all votes by this user
+     */
+    public function votes()
+    {
+        return $this->hasMany(\App\Models\Models\Voting::class, 'user_id');
+    }
+
+    /**
      * Determine if the user can access the Filament admin panel.
      */
     public function canAccessPanel(Panel $panel): bool
