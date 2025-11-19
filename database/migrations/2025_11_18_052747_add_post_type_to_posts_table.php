@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('thumbnail')->nullable()->after('featured_image');
+            $table->string('post_type')->default('post')->index(); // Default post type is 'post' like WordPress
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn('thumbnail');
+            $table->dropColumn('post_type');
         });
     }
 };

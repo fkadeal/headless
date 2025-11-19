@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Models\PostMeta;
 use App\Traits\Filterable;
 
 class Post extends Model
@@ -25,12 +26,14 @@ class Post extends Model
         'featured_image',
         'meta_data',
         'thumbnail',
+        'post_type',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'is_published' => 'boolean',
         'meta_data' => 'array',
+        'post_type' => 'string',
     ];
 
     // Define searchable fields
@@ -39,6 +42,11 @@ class Post extends Model
         'content',
         'excerpt',
         'slug',
+        'post_type',
+    ];
+
+    protected $attributes = [
+        'post_type' => 'post', // Default WordPress-like post type
     ];
 
     public function category(): BelongsTo
@@ -54,5 +62,47 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'post_tag');
+    }
+
+    public function meta(): HasMany
+    {
+        return $this->hasMany(PostMeta::class, 'post_id');
+    }
+
+    /**
+     * Get a specific meta value for the post
+     */
+    public function getMeta($key, $default = null)
+    {
+        $meta = $this->meta()->where('meta_key', $key)->first();
+        
+        return $meta ? $meta->meta_value : $default;
+    }
+
+    /**
+     * Add or update a meta value for the post
+     */
+    public function setMeta($key, $value)
+    {
+        return $this->meta()->updateOrCreate(
+            ['meta_key' => $key],
+            ['meta_value' => $value]
+        );
+    }
+
+    /**
+     * Delete a meta key for the post
+     */
+    public function deleteMeta($key)
+    {
+        return $this->meta()->where('meta_key', $key)->delete();
+    }
+
+    /**
+     * Check if a meta key exists for the post
+     */
+    public function hasMeta($key)
+    {
+        return $this->meta()->where('meta_key', $key)->exists();
     }
 }
