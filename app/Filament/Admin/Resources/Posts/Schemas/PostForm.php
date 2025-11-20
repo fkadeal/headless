@@ -25,7 +25,22 @@ class PostForm
     {
         // Get the post type from request parameter or from the record
         $postType = request()->query('post_type');
-        $record = request()->route()->parameter('record'); // Get the record if we're editing
+
+        // Get the record if we're editing - check if we're in edit mode
+        $route = request()->route();
+        $record = null;
+
+        if ($route) {
+            $routeParameters = $route->parameters();
+            if (isset($routeParameters['record'])) {
+                $record = $routeParameters['record'];
+
+                // If record is still a string (ID), try to find the model
+                if (is_string($record) || is_numeric($record)) {
+                    $record = \App\Models\Post::find($record);
+                }
+            }
+        }
 
         // If no post type from query, try to get it from the record
         if (!$postType && $record && $record->post_type) {
