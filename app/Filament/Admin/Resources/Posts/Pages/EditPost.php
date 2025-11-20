@@ -29,7 +29,7 @@ class EditPost extends EditRecord
         return $data;
     }
 
-    protected function handleRecordUpdate(Model $record, array $data): Model
+    protected function handleRecordUpdate(\Illuminate\Database\Eloquent\Model $record, array $data): \Illuminate\Database\Eloquent\Model
     {
         // Update the main record first
         $record->update($data);

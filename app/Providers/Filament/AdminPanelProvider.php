@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\CustomDashboard;
+use App\Filament\Admin\Pages\VotingAnalytics;
 use App\Filament\Admin\Resources\Categories\CategoryResource;
 use App\Filament\Admin\Resources\CustomPostTypes\CustomPostTypeResource;
 use App\Filament\Admin\Resources\Pages\PageResource;
@@ -64,11 +65,13 @@ class AdminPanelProvider extends PanelProvider
 
     // Resources
     $resourceItems = [
+        ...CustomDashboard::getNavigationItems(),
+        ...VotingAnalytics::getNavigationItems(),
         ...CategoryResource::getNavigationItems(),
         ...CustomPostTypeResource::getNavigationItems(),
         ...PageResource::getNavigationItems(),
         ...TagResource::getNavigationItems(),
-        ...PostResource::getNavigationItems(),
+        // ...PostResource::getNavigationItems(),
     ];
 
     // Dynamic Custom Post Types - these will redirect to the Post resource with a filter
