@@ -6,6 +6,7 @@ use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\Models\CustomPostType;
+use Illuminate\Support\Facades\Auth;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -116,7 +117,7 @@ class PostForm
             'created_by' => function() {
                 return Select::make('created_by')
                     ->options(User::pluck('name', 'id'))
-                    ->default(auth()->id()) // Default to currently logged-in user
+                    ->default(Auth::id()) // Default to currently logged-in user
                     ->nullable() // Allow null values to be stored if needed
                     ->searchable()
                     ->helperText('Select the author for this post (defaults to current user)');
@@ -138,6 +139,15 @@ class PostForm
             $standardFieldsToInclude = ['title', 'slug', 'content', 'excerpt', 'category_id', 'is_published', 'created_by', 'is_active', 'thumbnail'];
         }
 
+        // Ensure required fields are always included (with default values) even if not in custom config
+        // These are required by the database schema
+        $requiredFields = ['category_id', 'created_by'];
+        foreach ($requiredFields as $field) {
+            if (!in_array($field, $standardFieldsToInclude)) {
+                $standardFieldsToInclude[] = $field; // Add it so we can provide a default
+            }
+        }
+
         // Group fields by section based on selection
         $basicFields = [];
         $contentFields = [];
@@ -156,10 +166,28 @@ class PostForm
             $basicFields[] = $availableStandardFields['is_active']();
         }
         if (in_array('category_id', $standardFieldsToInclude)) {
-            $basicFields[] = $availableStandardFields['category_id']();
+            $categoryField = $availableStandardFields['category_id']();
+            // If this wasn't explicitly configured for this custom post type, make it hidden or use a default
+            if ($customPostType && !in_array('category_id', $customPostType->standard_fields ?? [])) {
+                // This is a required field added for database constraints, set a default
+                $defaultCategory = \App\Models\Category::first();
+                if ($defaultCategory) {
+                    $categoryField = $categoryField->default($defaultCategory->id)->hidden();
+                } else {
+                    // If no categories exist, we'll handle this in the CreatePost page
+                    $categoryField = $categoryField->hidden();
+                }
+            }
+            $basicFields[] = $categoryField;
         }
         if (in_array('created_by', $standardFieldsToInclude)) {
-            $basicFields[] = $availableStandardFields['created_by']();
+            $authorField = $availableStandardFields['created_by']();
+            // If this wasn't explicitly configured for this custom post type, make it hidden or use a default
+            if ($customPostType && !in_array('created_by', $customPostType->standard_fields ?? [])) {
+                // This is a required field added for database constraints, set to current user
+                $authorField = $authorField->default(Auth::id())->hidden();
+            }
+            $basicFields[] = $authorField;
         }
 
         if (!empty($basicFields)) {
