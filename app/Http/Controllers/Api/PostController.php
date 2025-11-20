@@ -50,6 +50,12 @@ class PostController extends Controller
 
         $posts = $query->paginate($request->per_page ?? 15);
 
+        // Add vote count to each post
+        $posts->getCollection()->transform(function ($post) {
+            $post->vote_count = $post->votes()->count();
+            return $post;
+        });
+
         return response()->json([
             'success' => true,
             'data' => $posts,
@@ -114,7 +120,10 @@ class PostController extends Controller
     public function show(Post $post): JsonResponse
     {
         $post->load(['category', 'author', 'tags']);
-        
+
+        // Add vote count to the post data
+        $post->vote_count = $post->votes()->count();
+
         return response()->json([
             'success' => true,
             'data' => $post,

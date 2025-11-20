@@ -53,13 +53,17 @@ class AuthenticatedSessionController extends Controller
             // Return a Response object with JSON content
             return new Response(
                 json_encode([
-                    'message' => 'Authenticated successfully',
-                    'token' => $token,
-                    'token_type' => 'Bearer',
+                    'success' => true,
+                    'message' => 'Authenticated successfully', 
+                    'data' => [
+                        'user' => $user,
+                        'token' => $token,
+                        'token_type' => 'Bearer',
+                    ],
                 ]),
                 200,
                 ['Content-Type' => 'application/json']
-            );
+            ); 
         } else {
             // For web requests (like Filament), use the normal authentication flow
             $request->authenticate();

@@ -2,16 +2,25 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Pages\CustomDashboard;
+use App\Filament\Admin\Resources\Categories\CategoryResource;
+use App\Filament\Admin\Resources\CustomPostTypes\CustomPostTypeResource;
+use App\Filament\Admin\Resources\Pages\PageResource;
+use App\Filament\Admin\Resources\Posts\PostResource;
+use App\Filament\Admin\Resources\Tags\TagResource;
+use App\Models\Category;
+use App\Models\Models\CustomPostType;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationBuilder;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Page;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -25,21 +34,66 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->id('admin')
+            ->sidebarFullyCollapsibleOnDesktop()
             ->path('admin')
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
-            ->pages([
-                \App\Filament\Admin\Pages\CustomDashboard::class,
+            ->pages([ CustomDashboard::class,
+                \App\Filament\Admin\Pages\VotingAnalytics::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
-            ->widgets([
-                // AccountWidget::class,
-                // FilamentInfoWidget::class,
+            ->navigationGroups([
+                'Content Types',
+                'Dynamic Categories',
             ])
-            ->middleware([
+            ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
+
+                
+                $staticItems = [
+        NavigationItem::make('Dashboard')
+            ->icon('heroicon-o-home') // heroicon v2 name
+            ->url(fn (): string => CustomDashboard::getUrl()),
+
+        NavigationItem::make('Voting Analytics')
+            ->icon('heroicon-o-chart-pie')
+            ->url(fn (): string => \App\Filament\Admin\Pages\VotingAnalytics::getUrl()),
+    ];
+
+    // 2️⃣ Resources
+    $resourceItems = [
+        ...CategoryResource::getNavigationItems(),
+        ...CustomPostTypeResource::getNavigationItems(),
+        ...PageResource::getNavigationItems(),
+        ...TagResource::getNavigationItems(),
+        ...PostResource::getNavigationItems(),
+    ];
+
+    // 3️⃣ Dynamic Custom Post Types
+    $cptItems = CustomPostType::where('enabled', true)
+        ->orderBy('menu_order')
+        ->get()
+        ->map(fn($cpt) => NavigationItem::make($cpt->singular_label)
+            ->icon($cpt->icon ?? 'heroicon-o-document-text')
+            ->group('Content Types')
+            ->url("/admin/custom-posts?custom_post_type_id={$cpt->id}")
+        )
+        ->all();
+
+    // 4️⃣ Merge everything into one flat array
+    $allItems = array_merge(
+        $staticItems,
+        $resourceItems,
+        $cptItems
+    );
+
+    // 5️⃣ Assign merged items to builder
+    $builder->items($allItems);
+
+    return $builder;
+            })->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
@@ -53,5 +107,10 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function boot(Panel $panel): void
+    {
+        // Do not add navigation in boot(); Filament does not support it here
     }
 }

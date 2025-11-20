@@ -28,7 +28,7 @@ class VotingAnalytics extends Page
 
     public static function canAccess(): bool
     {
-        // You can add custom access logic here if needed
-        return true;
+        // Only allow authenticated users to access this page
+        return auth()->check();
     }
 }

@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rules; 
+use Illuminate\Http\JsonResponse;
+
 
 class RegisteredUserController extends Controller
 {
@@ -18,24 +20,41 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): Response
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+public function store(Request $request): JsonResponse
+{
+    // Validate request
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->string('password')),
-        ]);
+    // Create user
+    $user = User::create([
+        'name' => $request->input('name'),
+        'email' => $request->input('email'),
+        'password' => Hash::make($request->input('password')),
+    ]);
 
-        event(new Registered($user));
+    // Fire Registered event
+    event(new Registered($user));
 
-        Auth::login($user);
+    logger('User registered'.json_encode($user));
 
-        return response()->noContent();
-    }
+    // Log in user
+    Auth::login($user);
+
+    // Create API token
+    $token = $user->createToken('api-token')->plainTextToken;
+
+    // Return JSON response
+    return response()->json([
+        'success' => true,
+        'message' => 'User registered successfully',
+        'data' => [
+            'user' => $user,
+            'token' => $token,
+        ],
+    ]);
+}
 }
