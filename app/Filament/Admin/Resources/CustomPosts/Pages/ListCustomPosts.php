@@ -15,7 +15,10 @@ class ListCustomPosts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->url(fn () => route('filament.admin.resources.custom-posts.create', [
+                    'custom_post_type_id' => request()->query('custom_post_type_id')
+                ])),
         ];
     }
 

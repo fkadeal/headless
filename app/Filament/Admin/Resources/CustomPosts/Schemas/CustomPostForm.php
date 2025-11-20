@@ -45,7 +45,7 @@ class CustomPostForm
         ];
 
         // Add content field if it's not a special type that doesn't need it
-        if (!$record || $record->customPostType->slug !== 'page') {
+        if (!$record || ($record->customPostType ?? null)?->slug !== 'page') {
             $fields[] = Section::make('Content')
                 ->schema([
                     RichEditor::make('content')
@@ -55,10 +55,22 @@ class CustomPostForm
         }
 
         // Add custom fields based on post type configuration
-        if ($record && $record->customPostType && $record->customPostType->config_fields) {
+        // Get custom post type from record if exists, otherwise from query parameter
+        $customPostType = null;
+        if ($record && $record->customPostType) {
+            $customPostType = $record->customPostType;
+        } else {
+            // When creating a new custom post, get the custom post type from the URL parameter
+            $customPostTypeId = request()->query('custom_post_type_id');
+            if ($customPostTypeId) {
+                $customPostType = \App\Models\Models\CustomPostType::find($customPostTypeId);
+            }
+        }
+
+        if ($customPostType && $customPostType->config_fields) {
             $fields[] = Section::make('Custom Fields')
                 ->description('Custom fields defined for this post type')
-                ->schema(self::buildCustomFields($record->customPostType->config_fields))
+                ->schema(self::buildCustomFields($customPostType->config_fields))
                 ->columns(2);
         }
 

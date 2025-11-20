@@ -20,4 +20,14 @@ class EditCustomPost extends EditRecord
             RestoreAction::make(),
         ];
     }
+
+    public function getTitle(): string
+    {
+        $customPostType = $this->record->customPostType;
+        if ($customPostType) {
+            return 'Edit ' . $customPostType->singular_label;
+        }
+
+        return parent::getTitle();
+    }
 }
