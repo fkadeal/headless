@@ -23,6 +23,23 @@ class CreatePost extends CreateRecord
             $data['created_by'] = auth()->id();
         }
 
+        // If category_id is not set, default to a default category (e.g., the first category)
+        if (!isset($data['category_id']) || empty($data['category_id'])) {
+            // Try to get a default category, or create a 'General' category if none exists
+            $defaultCategory = \App\Models\Category::first();
+            if ($defaultCategory) {
+                $data['category_id'] = $defaultCategory->id;
+            } else {
+                // Create a default category if no categories exist
+                $defaultCategory = \App\Models\Category::create([
+                    'name' => 'General',
+                    'slug' => 'general',
+                    'description' => 'Default category for posts',
+                ]);
+                $data['category_id'] = $defaultCategory->id;
+            }
+        }
+
         // Extract custom fields data from meta_data if present
         if (isset($data['meta_data']) && is_array($data['meta_data'])) {
             // Store custom fields in session to persist between requests
