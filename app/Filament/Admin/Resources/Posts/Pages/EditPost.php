@@ -26,6 +26,10 @@ class EditPost extends EditRecord
             unset($data['created_by']);
         }
 
+        // Preserve the post_type to prevent it from being changed during edit
+        // The post_type should only change when explicitly creating a new post type
+        unset($data['post_type']); // This ensures the original post_type is preserved
+
         // Extract custom fields data from meta_data if present
         if (isset($data['meta_data']) && is_array($data['meta_data'])) {
             // Store custom fields in session to persist between requests

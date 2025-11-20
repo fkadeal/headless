@@ -12,10 +12,14 @@ class CreatePost extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Check if there's a post_type parameter in the URL
-        $postType = request()->query('post_type');
-        if ($postType) {
-            $data['post_type'] = $postType;
+        // Check if there's a post_type parameter in the URL and ensure it's properly set
+        $postTypeFromUrl = request()->query('post_type');
+        if ($postTypeFromUrl) {
+            $data['post_type'] = $postTypeFromUrl;
+        }
+        // If post_type is still not set, default to 'post'
+        else {
+            $data['post_type'] = 'post';
         }
 
         // If created_by is not set, default to the currently logged-in user
