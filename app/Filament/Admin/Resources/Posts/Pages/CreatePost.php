@@ -18,6 +18,11 @@ class CreatePost extends CreateRecord
             $data['post_type'] = $postType;
         }
 
+        // If created_by is not set, default to the currently logged-in user
+        if (!isset($data['created_by']) || empty($data['created_by'])) {
+            $data['created_by'] = auth()->id();
+        }
+
         // Extract custom fields data from meta_data if present
         if (isset($data['meta_data']) && is_array($data['meta_data'])) {
             // Store custom fields in session to persist between requests

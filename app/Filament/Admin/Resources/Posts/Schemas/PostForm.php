@@ -116,9 +116,10 @@ class PostForm
             'created_by' => function() {
                 return Select::make('created_by')
                     ->options(User::pluck('name', 'id'))
-                    ->required()
+                    ->default(auth()->id()) // Default to currently logged-in user
+                    ->nullable() // Allow null values to be stored if needed
                     ->searchable()
-                    ->helperText('Select the author for this post');
+                    ->helperText('Select the author for this post (defaults to current user)');
             },
             'is_active' => function() {
                 return Toggle::make('is_active')

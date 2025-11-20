@@ -19,6 +19,13 @@ class EditPost extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        // For editing, only set created_by if it's explicitly provided in the form data
+        // This prevents accidentally changing the author when other fields are updated
+        if (!isset($data['created_by']) || empty($data['created_by'])) {
+            // Remove created_by from data to preserve the original author
+            unset($data['created_by']);
+        }
+
         // Extract custom fields data from meta_data if present
         if (isset($data['meta_data']) && is_array($data['meta_data'])) {
             // Store custom fields in session to persist between requests
