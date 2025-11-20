@@ -14,10 +14,23 @@ class ListCustomPosts extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        $customPostTypeId = request()->query('custom_post_type_id');
+
+        // Only show create action if custom post type ID is provided
+        if (!$customPostTypeId) {
+            return [];
+        }
+
+        // Verify custom post type exists before showing the create action
+        $customPostType = \App\Models\Models\CustomPostType::find($customPostTypeId);
+        if (!$customPostType) {
+            return [];
+        }
+
         return [
             CreateAction::make()
                 ->url(fn () => route('filament.admin.resources.custom-posts.create', [
-                    'custom_post_type_id' => request()->query('custom_post_type_id')
+                    'custom_post_type_id' => $customPostTypeId
                 ])),
         ];
     }

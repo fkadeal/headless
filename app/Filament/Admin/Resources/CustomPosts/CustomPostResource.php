@@ -91,7 +91,7 @@ class CustomPostResource extends Resource
     {
         return [
             'index' => ListCustomPosts::route('/'),
-            'create' => CreateCustomPost::route('/create'),
+            'create' => CreateCustomPost::route('/create'), // This route will only be accessible via the proper navigation now
             'edit' => EditCustomPost::route('/{record}/edit'),
         ];
     }
