@@ -22,39 +22,8 @@ class CustomPostForm
     {
         $record = $schema->getRecord();
 
-        $fields = [
-            Section::make('Basic Information')
-                ->description('Basic information for this post')
-                ->schema([
-                    TextInput::make('title')
-                        ->required()
-                        ->maxLength(255)
-                        ->helperText('Title of the post'),
+        $fields = [];
 
-                    TextInput::make('slug')
-                        ->required()
-                        ->maxLength(255)
-                        ->unique(ignoreRecord: true)
-                        ->helperText('URL-friendly slug'),
-
-                    Toggle::make('is_published')
-                        ->label('Published')
-                        ->helperText('Set to publish this post'),
-                ])
-                ->columns(2),
-        ];
-
-        // Add content field if it's not a special type that doesn't need it
-        if (!$record || ($record->customPostType ?? null)?->slug !== 'page') {
-            $fields[] = Section::make('Content')
-                ->schema([
-                    RichEditor::make('content')
-                        ->label('Content')
-                        ->helperText('Main content of the post'),
-                ]);
-        }
-
-        // Add custom fields based on post type configuration
         // Get custom post type from record if exists, otherwise from query parameter
         $customPostType = null;
         if ($record && $record->customPostType) {
@@ -67,6 +36,119 @@ class CustomPostForm
             }
         }
 
+        // Define standard fields that can be included
+        $availableStandardFields = [
+            'title' => function() {
+                return TextInput::make('title')
+                    ->required()
+                    ->maxLength(255)
+                    ->helperText('Title of the post');
+            },
+            'slug' => function() {
+                return TextInput::make('slug')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true)
+                    ->helperText('URL-friendly slug');
+            },
+            'content' => function() {
+                return RichEditor::make('content')
+                    ->label('Content')
+                    ->helperText('Main content of the post');
+            },
+            'excerpt' => function() {
+                return Textarea::make('excerpt')
+                    ->helperText('Short description of the post')
+                    ->maxLength(500);
+            },
+            'featured_image' => function() {
+                return FileUpload::make('featured_image')
+                    ->image()
+                    ->directory('featured-images')
+                    ->visibility('public')
+                    ->helperText('Featured image for the post');
+            },
+            'thumbnail' => function() {
+                return FileUpload::make('thumbnail')
+                    ->image()
+                    ->directory('thumbnails')
+                    ->visibility('public')
+                    ->helperText('Thumbnail image for the post');
+            },
+            'is_published' => function() {
+                return Toggle::make('is_published')
+                    ->label('Published')
+                    ->helperText('Set to publish this post');
+            },
+            'category_id' => function() {
+                return Select::make('category_id')
+                    ->label('Category')
+                    ->options(\App\Models\Category::pluck('name', 'id')->toArray())
+                    ->searchable()
+                    ->helperText('Select a category for this post');
+            },
+        ];
+
+        // Add selected standard fields based on post type configuration
+        $standardFieldsToInclude = $customPostType?->standard_fields ?? ['title', 'slug', 'content', 'is_published'];
+
+        // Group fields by section based on selection
+        $basicFields = [];
+        $contentFields = [];
+        $mediaFields = [];
+
+        if (in_array('title', $standardFieldsToInclude)) {
+            $basicFields[] = $availableStandardFields['title']();
+        }
+        if (in_array('slug', $standardFieldsToInclude)) {
+            $basicFields[] = $availableStandardFields['slug']();
+        }
+        if (in_array('is_published', $standardFieldsToInclude)) {
+            $basicFields[] = $availableStandardFields['is_published']();
+        }
+        if (in_array('category_id', $standardFieldsToInclude)) {
+            $basicFields[] = $availableStandardFields['category_id']();
+        }
+
+        if (!empty($basicFields)) {
+            $fields[] = Section::make('Basic Information')
+                ->description('Basic information for this post')
+                ->schema($basicFields)
+                ->columns(2);
+        }
+
+        if (in_array('content', $standardFieldsToInclude)) {
+            // Add content field if it's not a special type that doesn't need it
+            if (!$record || ($record->customPostType ?? null)?->slug !== 'page') {
+                $contentFields[] = $availableStandardFields['content']();
+            }
+        }
+
+        if (in_array('excerpt', $standardFieldsToInclude)) {
+            $contentFields[] = $availableStandardFields['excerpt']();
+        }
+
+        if (!empty($contentFields)) {
+            $fields[] = Section::make('Content')
+                ->schema($contentFields);
+        }
+
+        if (in_array('featured_image', $standardFieldsToInclude) || in_array('thumbnail', $standardFieldsToInclude)) {
+            if (in_array('featured_image', $standardFieldsToInclude)) {
+                $mediaFields[] = $availableStandardFields['featured_image']();
+            }
+
+            if (in_array('thumbnail', $standardFieldsToInclude)) {
+                $mediaFields[] = $availableStandardFields['thumbnail']();
+            }
+
+            if (!empty($mediaFields)) {
+                $fields[] = Section::make('Media')
+                    ->schema($mediaFields);
+            }
+        }
+
+        // Add custom fields based on post type configuration
         if ($customPostType && $customPostType->config_fields) {
             $fields[] = Section::make('Custom Fields')
                 ->description('Custom fields defined for this post type')

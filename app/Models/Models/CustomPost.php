@@ -14,7 +14,12 @@ class CustomPost extends Model
     protected $fillable = [
         'title',
         'slug',
+        'excerpt',
         'content',
+        'category_id',
+        'featured_image',
+        'thumbnail',
+        'meta_data',
         'custom_fields_data',
         'custom_post_type_id',
         'created_by',
@@ -23,6 +28,7 @@ class CustomPost extends Model
     ];
 
     protected $casts = [
+        'meta_data' => 'array',
         'custom_fields_data' => 'array',
         'is_published' => 'boolean',
         'published_at' => 'datetime',
@@ -39,5 +45,10 @@ class CustomPost extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Category::class);
     }
 }

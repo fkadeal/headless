@@ -45,8 +45,27 @@ class CustomPostTypeForm
                     ])
                     ->columns(2),
 
+                Section::make('Standard Post Fields')
+                    ->description('Select which standard post fields to include')
+                    ->schema([
+                        Select::make('standard_fields')
+                            ->multiple()
+                            ->options([
+                                'title' => 'Title',
+                                'slug' => 'Slug',
+                                'content' => 'Content',
+                                'excerpt' => 'Excerpt',
+                                'featured_image' => 'Featured Image',
+                                'thumbnail' => 'Thumbnail',
+                                'is_published' => 'Published Status',
+                                'category_id' => 'Category',
+                            ])
+                            ->default(['title', 'slug', 'content', 'is_published'])
+                            ->helperText('Select standard post fields to include in this post type'),
+                    ]),
+
                 Section::make('Custom Fields Configuration')
-                    ->description('Define the custom fields for this post type')
+                    ->description('Define additional custom fields for this post type')
                     ->schema([
                         Repeater::make('config_fields')
                             ->label('Custom Fields')

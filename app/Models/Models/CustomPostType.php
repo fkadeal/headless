@@ -16,12 +16,14 @@ class CustomPostType extends Model
         'singular_label',
         'plural_label',
         'config_fields',
+        'standard_fields',
         'enabled',
         'menu_order',
     ];
 
     protected $casts = [
         'config_fields' => 'array',
+        'standard_fields' => 'array',
         'enabled' => 'boolean',
         'menu_order' => 'integer',
         'created_at' => 'datetime',
