@@ -34,9 +34,22 @@ class PostResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->whereHas('category', function ($query) {
-            $query->where('name', '!=', 'Page');
-        });
+        $query = parent::getEloquentQuery();
+
+        // Check if there's a post_type filter in the request
+        $postType = request()->query('post_type');
+
+        if ($postType) {
+            // Filter by the specified post type
+            $query->where('post_type', $postType);
+        } else {
+            // Default behavior: exclude pages
+            $query->whereHas('category', function ($query) {
+                $query->where('name', '!=', 'Page');
+            });
+        }
+
+        return $query;
     }
 
     public static function getRelations(): array
@@ -44,6 +57,34 @@ class PostResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        $postType = request()->query('post_type');
+
+        if ($postType) {
+            $customPostType = \App\Models\Models\CustomPostType::where('slug', $postType)->first();
+            if ($customPostType) {
+                return $customPostType->singular_label ?? $customPostType->name;
+            }
+        }
+
+        return parent::getModelLabel() ?? 'Post';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        $postType = request()->query('post_type');
+
+        if ($postType) {
+            $customPostType = \App\Models\Models\CustomPostType::where('slug', $postType)->first();
+            if ($customPostType) {
+                return $customPostType->plural_label ?? $customPostType->name . 's';
+            }
+        }
+
+        return parent::getPluralModelLabel() ?? 'Posts';
     }
 
     public static function getPages(): array

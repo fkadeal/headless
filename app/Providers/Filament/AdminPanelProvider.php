@@ -51,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
 
-                
+
                 $staticItems = [
         NavigationItem::make('Dashboard')
             ->icon('heroicon-o-home') // heroicon v2 name
@@ -62,7 +62,7 @@ class AdminPanelProvider extends PanelProvider
             ->url(fn (): string => \App\Filament\Admin\Pages\VotingAnalytics::getUrl()),
     ];
 
-    // 2️⃣ Resources
+    // Resources
     $resourceItems = [
         ...CategoryResource::getNavigationItems(),
         ...CustomPostTypeResource::getNavigationItems(),
@@ -71,25 +71,25 @@ class AdminPanelProvider extends PanelProvider
         ...PostResource::getNavigationItems(),
     ];
 
-    // 3️⃣ Dynamic Custom Post Types
+    // Dynamic Custom Post Types - these will redirect to the Post resource with a filter
     $cptItems = CustomPostType::where('enabled', true)
         ->orderBy('menu_order')
         ->get()
         ->map(fn($cpt) => NavigationItem::make($cpt->singular_label)
             ->icon($cpt->icon ?? 'heroicon-o-document-text')
             ->group('Content Types')
-            ->url("/admin/custom-posts?custom_post_type_id={$cpt->id}")
+            ->url("/admin/posts?post_type={$cpt->slug}") // Filter posts by the custom post type
         )
         ->all();
 
-    // 4️⃣ Merge everything into one flat array
+    // Merge everything into one flat array
     $allItems = array_merge(
         $staticItems,
         $resourceItems,
         $cptItems
     );
 
-    // 5️⃣ Assign merged items to builder
+    // Assign merged items to builder
     $builder->items($allItems);
 
     return $builder;
