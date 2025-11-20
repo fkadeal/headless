@@ -71,7 +71,7 @@ class AdminPanelProvider extends PanelProvider
         ...CustomPostTypeResource::getNavigationItems(),
         ...PageResource::getNavigationItems(),
         ...TagResource::getNavigationItems(),
-        // ...PostResource::getNavigationItems(),
+        ...PostResource::getNavigationItems(),
     ];
 
     // Dynamic Custom Post Types - these will redirect to the Post resource with a filter

@@ -12,8 +12,20 @@ class ListPosts extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        // Get the post_type from the query string to preserve it when creating
+        $postType = request()->query('post_type');
+
+        $createAction = CreateAction::make();
+
+        // Only modify the action if there's a post_type in the query
+        if ($postType) {
+            $createAction->url(
+                fn () => route('filament.admin.resources.posts.create', ['post_type' => $postType])
+            );
+        }
+
         return [
-            CreateAction::make(),
+            $createAction,
         ];
     }
 }
