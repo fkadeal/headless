@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Posts\Schemas;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Models\Category;
+use App\Models\User;
 use App\Models\Models\CustomPostType;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
@@ -92,14 +93,14 @@ class PostForm
             },
             'category_id' => function() {
                 return Select::make('category_id')
-                    ->relationship('category', 'name')
+                    ->options(Category::pluck('name', 'id'))
                     ->nullable()
                     ->searchable()
                     ->helperText('Select a category for this post');
             },
             'created_by' => function() {
                 return Select::make('created_by')
-                    ->relationship('author', 'name')
+                    ->options(User::pluck('name', 'id'))
                     ->required()
                     ->searchable()
                     ->helperText('Select the author for this post');
