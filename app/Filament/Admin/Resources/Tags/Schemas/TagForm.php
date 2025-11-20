@@ -2,8 +2,6 @@
 
 namespace App\Filament\Admin\Resources\Tags\Schemas;
 
-namespace App\Filament\Admin\Resources\Tags\Schemas;
-
 class TagForm
 {
     public static function configure(): array

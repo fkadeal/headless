@@ -39,56 +39,76 @@ class PostForm
 
         // Define standard fields that can be included
         $availableStandardFields = [
-            'title' => function() => TextInput::make('title')
-                ->required()
-                ->maxLength(255)
-                ->helperText('Title of the post'),
-            'slug' => function() => TextInput::make('slug')
-                ->required()
-                ->maxLength(255)
-                ->unique(ignoreRecord: true)
-                ->helperText('URL-friendly slug'),
-            'content' => function() => TinyEditor::make('content')
-                ->profile('full')
-                ->columnSpanFull()
-                ->fileAttachmentsDisk('public')
-                ->fileAttachmentsDirectory('uploads')
-                ->required()
-                ->helperText('Main content of the post'),
-            'excerpt' => function() => Textarea::make('excerpt')
-                ->helperText('Short description of the post')
-                ->maxLength(65535),
-            'featured_image' => function() => FileUpload::make('featured_image')
-                ->image()
-                ->disk('public')
-                ->directory('featured-images')
-                ->visibility('public')
-                ->helperText('Featured image for the post')
-                ->columnSpanFull(),
-            'thumbnail' => function() => FileUpload::make('thumbnail')
-                ->image()
-                ->disk('public')
-                ->directory('thumbnails')
-                ->nullable()
-                ->visibility('public')
-                ->helperText('Thumbnail image for the post')
-                ->columnSpanFull(),
-            'is_published' => function() => Toggle::make('is_published')
-                ->label('Published')
-                ->helperText('Set to publish this post'),
-            'category_id' => function() => Select::make('category_id')
-                ->relationship('category', 'name')
-                ->nullable()
-                ->searchable()
-                ->helperText('Select a category for this post'),
-            'created_by' => function() => Select::make('created_by')
-                ->relationship('author', 'name')
-                ->required()
-                ->searchable()
-                ->helperText('Select the author for this post'),
-            'is_active' => function() => Toggle::make('is_active')
-                ->label('Is Active')
-                ->helperText('Set to activate this post'),
+            'title' => function() {
+                return TextInput::make('title')
+                    ->required()
+                    ->maxLength(255)
+                    ->helperText('Title of the post');
+            },
+            'slug' => function() {
+                return TextInput::make('slug')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true)
+                    ->helperText('URL-friendly slug');
+            },
+            'content' => function() {
+                return TinyEditor::make('content')
+                    ->profile('full')
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('uploads')
+                    ->required()
+                    ->helperText('Main content of the post');
+            },
+            'excerpt' => function() {
+                return Textarea::make('excerpt')
+                    ->helperText('Short description of the post')
+                    ->maxLength(65535);
+            },
+            'featured_image' => function() {
+                return FileUpload::make('featured_image')
+                    ->image()
+                    ->disk('public')
+                    ->directory('featured-images')
+                    ->visibility('public')
+                    ->helperText('Featured image for the post')
+                    ->columnSpanFull();
+            },
+            'thumbnail' => function() {
+                return FileUpload::make('thumbnail')
+                    ->image()
+                    ->disk('public')
+                    ->directory('thumbnails')
+                    ->nullable()
+                    ->visibility('public')
+                    ->helperText('Thumbnail image for the post')
+                    ->columnSpanFull();
+            },
+            'is_published' => function() {
+                return Toggle::make('is_published')
+                    ->label('Published')
+                    ->helperText('Set to publish this post');
+            },
+            'category_id' => function() {
+                return Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->nullable()
+                    ->searchable()
+                    ->helperText('Select a category for this post');
+            },
+            'created_by' => function() {
+                return Select::make('created_by')
+                    ->relationship('author', 'name')
+                    ->required()
+                    ->searchable()
+                    ->helperText('Select the author for this post');
+            },
+            'is_active' => function() {
+                return Toggle::make('is_active')
+                    ->label('Is Active')
+                    ->helperText('Set to activate this post');
+            },
         ];
 
         $fields = [];
