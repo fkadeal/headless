@@ -3,7 +3,7 @@
 namespace App\Filament\Admin\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use App\Models\Models\Voting;
+use App\Models\Voting;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 
@@ -27,13 +27,13 @@ class VotingAnalyticsChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'Votes',
-                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
+                    'data' => $data->map(fn(TrendValue $value) => $value->aggregate),
                     'borderColor' => '#3b82f6',
                     'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
                     'fill' => true,
                 ],
             ],
-            'labels' => $data->map(fn (TrendValue $value) => $value->date),
+            'labels' => $data->map(fn(TrendValue $value) => $value->date),
         ];
     }
 

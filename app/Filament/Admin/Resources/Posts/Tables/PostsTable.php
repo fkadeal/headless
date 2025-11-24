@@ -17,7 +17,7 @@ class PostsTable
             TextColumn::make('title')
                 ->searchable()
                 ->sortable(),
-             
+
             ImageColumn::make('thumbnail')
                 ->label('Thumbnail')
                 ->circular()

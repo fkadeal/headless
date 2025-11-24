@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Models\PostMeta;
-use App\Models\Models\Voting;
+use App\Models\PostMeta;
+use App\Models\Voting;
 use App\Traits\Filterable;
 
 class Post extends Model
@@ -76,7 +76,7 @@ class Post extends Model
     public function getMeta($key, $default = null)
     {
         $meta = $this->meta()->where('meta_key', $key)->first();
-        
+
         return $meta ? $meta->meta_value : $default;
     }
 

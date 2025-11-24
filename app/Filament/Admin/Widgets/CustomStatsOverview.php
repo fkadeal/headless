@@ -7,7 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\User;
-use App\Models\Models\Voting;
+use App\Models\Voting;
 
 class CustomStatsOverview extends BaseWidget
 {

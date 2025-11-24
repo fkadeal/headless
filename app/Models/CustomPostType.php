@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Models\CustomPost;
+use App\Models\CustomPost;
 
 class CustomPostType extends Model
 {
@@ -31,8 +31,8 @@ class CustomPostType extends Model
         'deleted_at' => 'datetime',
     ];
 
-    public function customPosts()
-    {
-        return $this->hasMany(CustomPost::class, 'custom_post_type_id');
-    }
+    // public function customPosts()
+    // {
+    //     return $this->hasMany(CustomPost::class, 'custom_post_type_id');
+    // }
 }

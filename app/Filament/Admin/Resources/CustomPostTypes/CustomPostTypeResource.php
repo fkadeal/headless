@@ -7,7 +7,7 @@ use App\Filament\Admin\Resources\CustomPostTypes\Pages\EditCustomPostType;
 use App\Filament\Admin\Resources\CustomPostTypes\Pages\ListCustomPostTypes;
 use App\Filament\Admin\Resources\CustomPostTypes\Schemas\CustomPostTypeForm;
 use App\Filament\Admin\Resources\CustomPostTypes\Tables\CustomPostTypesTable;
-use App\Models\Models\CustomPostType;
+use App\Models\CustomPostType;
 use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;

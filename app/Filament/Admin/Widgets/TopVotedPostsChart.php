@@ -3,8 +3,9 @@
 namespace App\Filament\Admin\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use App\Models\Models\Voting;
+use App\Models\Voting;
 use App\Models\Post;
+use Illuminate\Support\Facades\DB;
 
 class TopVotedPostsChart extends ChartWidget
 {
@@ -14,7 +15,7 @@ class TopVotedPostsChart extends ChartWidget
 
     protected function getData(): array
     {
-        $votingData = Voting::select('post_id', \DB::raw('count(*) as vote_count'))
+        $votingData = Voting::select('post_id', DB::raw('count(*) as vote_count'))
             ->groupBy('post_id')
             ->orderBy('vote_count', 'desc')
             ->limit(5)

@@ -5,20 +5,18 @@ namespace App\Providers\Filament;
 use App\Filament\Admin\Pages\CustomDashboard;
 use App\Filament\Admin\Pages\VotingAnalytics;
 use App\Filament\Admin\Resources\Categories\CategoryResource;
+use App\Filament\Admin\Resources\CPT\CPTResource;
 use App\Filament\Admin\Resources\CustomPostTypes\CustomPostTypeResource;
 use App\Filament\Admin\Resources\Pages\PageResource;
 use App\Filament\Admin\Resources\Posts\PostResource;
 use App\Filament\Admin\Resources\Tags\TagResource;
-use App\Models\Category;
-use App\Models\Models\CustomPostType;
+use App\Models\CustomPostType;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationItem;
-use Filament\Pages\Dashboard;
-use Filament\Pages\Page;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -42,9 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
-            ->pages([ CustomDashboard::class,
-                \App\Filament\Admin\Pages\VotingAnalytics::class,
-            ])
+            ->pages([CustomDashboard::class, VotingAnalytics::class])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->navigationGroups([
                 'Content Types',
@@ -52,50 +48,67 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
 
+                // Safe helper to get navigation items from a class
+                $getItems = fn($class) => $class::getNavigationItems() ?? [];
 
-                $staticItems = [
-        NavigationItem::make('Dashboard')
-            ->icon('heroicon-o-home') // heroicon v2 name
-            ->url(fn (): string => CustomDashboard::getUrl()),
+                // Core resources & pages
+                $resourceItems = array_merge(
+                    $getItems(CustomDashboard::class),
+                    $getItems(VotingAnalytics::class),
+                    $getItems(CategoryResource::class),
+                    $getItems(PageResource::class),
+                    $getItems(TagResource::class),
+                    $getItems(PostResource::class),
+                    $getItems(CustomPostTypeResource::class),
+                );
 
-        NavigationItem::make('Voting Analytics')
-            ->icon('heroicon-o-chart-pie')
-            ->url(fn (): string => \App\Filament\Admin\Pages\VotingAnalytics::getUrl()),
-    ];
+                // Dynamic Custom Post Types - cache for 60 minutes
+                $groupName = 'Content Types';
 
-    // Resources
-    $resourceItems = [
-        ...CustomDashboard::getNavigationItems(),
-        ...VotingAnalytics::getNavigationItems(),
-        ...CategoryResource::getNavigationItems(),
-        ...CustomPostTypeResource::getNavigationItems(),
-        ...PageResource::getNavigationItems(),
-        ...TagResource::getNavigationItems(),
-        ...PostResource::getNavigationItems(),
-    ];
+                // $cptItems = collect(cache()->remember('filament_cpt_nav_raw', 0, function () {
+                //     return CustomPostType::where('enabled', true)
+                //         ->orderBy('menu_order')
+                //         ->get()
+                //         ->map(fn($cpt) => [
+                //             'label' => $cpt->singular_label,
+                //             'slug' => $cpt->slug,
+                //             'icon' => $cpt->icon ?? 'heroicon-o-document-text',
+                //         ])
+                //         ->all();
+                // }))->map(
+                //     fn($data) => NavigationItem::make($data['label'])
+                //         ->icon($data['icon'])
+                //         ->group($groupName)
+                //         ->url("/admin/cpt/{$data['slug']}?post_type={$data['slug']}")
 
-    // Dynamic Custom Post Types - these will redirect to the Post resource with a filter
-    $cptItems = CustomPostType::where('enabled', true)
-        ->orderBy('menu_order')
-        ->get()
-        ->map(fn($cpt) => NavigationItem::make($cpt->singular_label)
-            ->icon($cpt->icon ?? 'heroicon-o-document-text')
-            ->group('Content Types')
-            ->url("/admin/posts?post_type={$cpt->slug}") // Filter posts by the custom post type
-        )
-        ->all();
+                // )->all();
 
-    // Merge everything into one flat array
-    $allItems = array_merge(
-        $staticItems,
-        $resourceItems,
-        $cptItems
-    );
+                $cptItems = collect(cache()->remember('filament_cpt_nav_raw', 0, function () {
+                    return CustomPostType::where('enabled', true)
+                        ->orderBy('menu_order')
+                        ->get()
+                        ->map(fn($cpt) => [
+                            'label' => $cpt->singular_label,
+                            'slug' => $cpt->slug,
+                            'icon' => $cpt->icon ?? 'heroicon-o-document-text',
+                        ])
+                        ->all();
+                }))->map(
+                    fn($data) => NavigationItem::make($data['label'])
+                        ->icon($data['icon'])
+                        ->group($groupName)
+                        ->url(fn() => CPTResource::getUrl('index', [
+                            'post_type' =>  $data['slug'],
+                        ]))
+                )->all();
 
-    // Assign merged items to builder
-    $builder->items($allItems);
+                // Merge all items into one flat array
+                $allItems = array_merge($resourceItems, $cptItems);
 
-    return $builder;
+                // Assign items to the builder
+                $builder->items($allItems);
+
+                return $builder;
             })->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
