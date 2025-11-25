@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Models\Voting;
+use App\Models\Voting;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -16,10 +16,11 @@ class VotingController extends Controller
      * Store a newly created vote in storage.
      */
     public function store(Request $request): JsonResponse
-    {
+    { 
         $validator = Validator::make($request->all(), [
             'post_id' => 'required|exists:posts,id',
         ]);
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -30,6 +31,7 @@ class VotingController extends Controller
         }
 
         $validated = $validator->validated();
+       
         
         // Check if the post exists
         $post = Post::find($validated['post_id']);

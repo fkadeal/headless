@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
-use App\Models\Models\CustomPostType;
+use App\Models\CustomPostType;
 
 class AppServiceProvider extends ServiceProvider
 {

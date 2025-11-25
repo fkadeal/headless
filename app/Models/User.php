@@ -54,7 +54,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function votes()
     {
-        return $this->hasMany(\App\Models\Models\Voting::class, 'user_id');
+        return $this->hasMany(\App\Models\Voting::class, 'user_id');
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Models\CustomPostType;
+use App\Models\CustomPostType;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 
