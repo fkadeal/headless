@@ -16,12 +16,10 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Post::with(['category', 'author', 'tags'])
-            // ->whereHas('category', function ($query) {
-            //     $query->where('name', '!=', 'Page');
-            // })
-            ;
-
+ 
+        $query = Post::with(['category', 'author', 'tags']);
+           
+        
         // Apply filters if present
         $filters = $request->query('filters', []);
         if (!empty($filters)) {
@@ -50,9 +48,22 @@ class PostController extends Controller
 
         $posts = $query->paginate($request->per_page ?? 15);
 
-        // Add vote count to each post
-        $posts->getCollection()->transform(function ($post) {
+        // Capture the authenticated user ID before transformation 
+        $user = auth('sanctum')->user();
+        $userId = optional($user)->id;
+        
+        // Add vote count and has_voted status to each post
+        $posts->getCollection()->transform(function ($post) use ($userId) {
             $post->vote_count = $post->votes()->count();
+
+            // Default has_voted to false
+            $post->has_voted = false;
+
+            // If user is authenticated, update with actual voting status
+            if ($userId) {
+                $post->has_voted = $post->hasUserVoted($userId);
+            }
+
             return $post;
         });
 
@@ -123,6 +134,14 @@ class PostController extends Controller
 
         // Add vote count to the post data
         $post->vote_count = $post->votes()->count();
+
+        // Default has_voted to false
+        $post->has_voted = false;
+
+        // If user is authenticated, update with actual voting status
+        if (auth()->check()) {
+            $post->has_voted = $post->hasUserVoted(auth()->id());
+        }
 
         return response()->json([
             'success' => true,
