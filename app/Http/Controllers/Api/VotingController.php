@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Voting;
 use App\Models\Post;
+use App\Models\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -16,11 +17,10 @@ class VotingController extends Controller
      * Store a newly created vote in storage.
      */
     public function store(Request $request): JsonResponse
-    { 
+    {
         $validator = Validator::make($request->all(), [
             'post_id' => 'required|exists:posts,id',
         ]);
-
 
         if ($validator->fails()) {
             return response()->json([
@@ -31,20 +31,19 @@ class VotingController extends Controller
         }
 
         $validated = $validator->validated();
-       
-        
+
         // Check if the post exists
         $post = Post::find($validated['post_id']);
         if (!$post) {
             return response()->json([
                 'success' => false,
-                'message' => 'Post not found',
+                'message' => 'not found',
             ], Response::HTTP_NOT_FOUND);
         }
 
         // Get user ID if authenticated, otherwise null
         $userId = auth()->check() ? auth()->id() : null;
-        
+
         // Get IP address (prioritizing forwarded/X-Real-IP headers)
         $ipAddress = $request->ip();
         if ($request->header('X-Real-IP')) {
@@ -53,29 +52,70 @@ class VotingController extends Controller
             $ipAddress = explode(',', $request->header('X-Forwarded-For'))[0];
         }
 
-        // Check if user has already voted (for logged in users)
-        if ($userId) {
-            $existingVote = Voting::where('user_id', $userId)
-                ->where('post_id', $validated['post_id'])
-                ->first();
-                
-            if ($existingVote) {
+        // Get voting rules from settings based on post type and category
+        $votingRule = $this->getVotingRule($post);
+
+        // Check if user has exceeded the maximum actions per post
+        if ($votingRule['max_actions_per_post'] > 0) {
+            $postVoteCount = $post->votes()->count();
+            if ($postVoteCount >= $votingRule['max_actions_per_post']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You have already voted on this post',
+                    'message' => $votingRule['max_reached_message'] ?? 'This post has reached the maximum allowed votes.',
+                ], Response::HTTP_CONFLICT);
+            }
+        }
+
+        // Check if user has already voted on this post (for logged in users)
+        if ($userId) {
+            $userPostVoteCount = Voting::where('user_id', $userId)
+                ->where('post_id', $validated['post_id'])
+                ->count();
+
+            if ($userPostVoteCount >= $votingRule['max_actions_per_user_per_post']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $votingRule['already_voted_message'] ?? 'You have already voted on this post',
                 ], Response::HTTP_CONFLICT);
             }
         } else {
             // Check if IP has already voted on this post (for anonymous users)
-            $existingVote = Voting::where('ip_address', $ipAddress)
+            $ipPostVoteCount = Voting::where('ip_address', $ipAddress)
                 ->where('post_id', $validated['post_id'])
-                ->first();
-                
-            if ($existingVote) {
+                ->count();
+
+            if ($ipPostVoteCount >= $votingRule['max_actions_per_user_per_post']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Your IP address has already voted on this post',
+                    'message' => $votingRule['already_voted_message'] ?? 'Your IP address has already voted on this post',
                 ], Response::HTTP_CONFLICT);
+            }
+        }
+
+        // Check if user has exceeded the maximum actions per category
+        if ($votingRule['max_actions_per_category_per_user'] > 0) {
+            if ($userId) {
+                $userCategoryVoteCount = Voting::where('user_id', $userId)
+                    ->where('category_id', $post->category_id)
+                    ->count();
+
+                if ($userCategoryVoteCount >= $votingRule['max_actions_per_category_per_user']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $votingRule['max_reached_message'] ?? 'You have reached the maximum allowed votes in this category.',
+                    ], Response::HTTP_CONFLICT);
+                }
+            } else {
+                $ipCategoryVoteCount = Voting::where('ip_address', $ipAddress)
+                    ->where('category_id', $post->category_id)
+                    ->count();
+
+                if ($ipCategoryVoteCount >= $votingRule['max_actions_per_category_per_user']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $votingRule['max_reached_message'] ?? 'Your IP address has reached the maximum allowed votes in this category.',
+                    ], Response::HTTP_CONFLICT);
+                }
             }
         }
 
@@ -89,9 +129,82 @@ class VotingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Vote added successfully',
+            'message' => $votingRule['success_message'] ?? 'Vote added successfully',
             'data' => $vote->load(['user', 'post', 'category']),
         ], Response::HTTP_CREATED);
+    }
+
+    /**
+     * Get voting rule based on post type and category
+     */
+    private function getVotingRule($post)
+    {
+        $settings = Settings::where('key', 'voting_rules')->get();
+
+        // Look for a specific rule for this post type and category
+        foreach ($settings as $setting) {
+            $value = $setting->value;
+
+            // Check if this setting applies to specific post type and category
+            if (
+                isset($value['post_type']) && $value['post_type'] === $post->post_type &&
+                isset($value['category_id']) && $value['category_id'] == $post->category_id
+            ) {
+                return array_merge($this->getDefaultVotingRule(), $value);
+            }
+
+            // Check if this setting applies to specific post type and all categories
+            if (
+                isset($value['post_type']) && $value['post_type'] === $post->post_type &&
+                !isset($value['category_id'])
+            ) {
+                return array_merge($this->getDefaultVotingRule(), $value);
+            }
+
+            // Check if this setting applies to specific category and all post types
+            if (
+                !isset($value['post_type']) &&
+                isset($value['category_id']) && $value['category_id'] == $post->category_id
+            ) {
+                return array_merge($this->getDefaultVotingRule(), $value);
+            }
+        }
+
+        // Finally, check for global rule (no post_type and no category_id)
+        $globalRule = Settings::where('key', 'voting_rules')
+            ->where(function ($query) {
+                $query->whereNull('value->post_type')
+                    ->orWhere('value->post_type', '');
+            })
+            ->where(function ($query) {
+                $query->whereNull('value->category_id')
+                    ->orWhere('value->category_id', '');
+            })
+            ->first();
+
+        if ($globalRule) {
+            return array_merge($this->getDefaultVotingRule(), $globalRule->value);
+        }
+
+        // Use default rules if no matching rule found
+        return $this->getDefaultVotingRule();
+    }
+
+    /**
+     * Get default voting rule values
+     */
+    private function getDefaultVotingRule()
+    {
+        // Default rule - no restrictions, standard messages
+        return [
+            'max_actions_per_post' => 0, // Unlimited
+            'max_actions_per_user_per_post' => 1,
+            'max_actions_per_category_per_user' => 0, // Unlimited
+            'action_expiration_hours' => 0, // No expiration
+            'already_voted_message' => 'You have already voted on this post',
+            'max_reached_message' => 'You have reached the maximum allowed votes.',
+            'success_message' => 'Vote added successfully',
+        ];
     }
 
     /**
@@ -129,7 +242,7 @@ class VotingController extends Controller
         }
 
         $userId = auth()->check() ? auth()->id() : null;
-        
+
         // Get IP address (prioritizing forwarded/X-Real-IP headers)
         $ipAddress = $request->ip();
         if ($request->header('X-Real-IP')) {
