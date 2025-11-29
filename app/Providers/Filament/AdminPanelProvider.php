@@ -9,6 +9,7 @@ use App\Filament\Admin\Resources\CPT\CPTResource;
 use App\Filament\Admin\Resources\CustomPostTypes\CustomPostTypeResource;
 use App\Filament\Admin\Resources\Pages\PageResource;
 use App\Filament\Admin\Resources\Posts\PostResource;
+use App\Filament\Admin\Resources\SettingsResource;
 use App\Filament\Admin\Resources\Tags\TagResource;
 use App\Models\CustomPostType;
 use Filament\Http\Middleware\Authenticate;
@@ -83,29 +84,30 @@ class AdminPanelProvider extends PanelProvider
 
                 // )->all();
 
-                $cptItems = collect(cache()->remember('filament_cpt_nav_raw', 0, function () {
-                    return CustomPostType::where('enabled', true)
-                        ->orderBy('menu_order')
-                        ->get()
-                        ->map(fn($cpt) => [
-                            'label' => $cpt->singular_label,
-                            'slug' => $cpt->slug,
-                            'icon' => $cpt->icon ?? 'heroicon-o-document-text',
-                        ])
-                        ->all();
-                }))->map(
-                    fn($data) => NavigationItem::make($data['label'])
-                        ->icon($data['icon'])
-                        ->group($groupName)
-                        ->url(fn() => CPTResource::getUrl('index', [
-                            'post_type' =>  $data['slug'],
-                        ]))
-                )->all();
+                // Dynamic Custom Post Types - these will redirect to the Post resource with a filter
+                $cptItems = CustomPostType::where('enabled', true)
+                    ->orderBy('menu_order')
+                    ->get()
+                    ->map(fn($cpt) => NavigationItem::make($cpt->singular_label)
+                        ->icon($cpt->icon ?? 'heroicon-o-document-text')
+                        ->group('Content Types')
+                        ->url("/admin/posts?post_type={$cpt->slug}") // Filter posts by the custom post type
+                    )
+                    ->all();
 
-                // Merge all items into one flat array
-                $allItems = array_merge($resourceItems, $cptItems);
+                // Add settings resource
+                $settingsItems = [
+                    ...SettingsResource::getNavigationItems(),
+                ];
 
-                // Assign items to the builder
+                // Merge everything into one flat array
+                $allItems = array_merge(
+                    $resourceItems,
+                    $cptItems,
+                    $settingsItems
+                );
+
+                // Assign merged items to builder
                 $builder->items($allItems);
 
                 return $builder;
