@@ -139,31 +139,41 @@ class VotingController extends Controller
      */
     private function getVotingRule($post)
     {
+        // Priority order for matching rules (from most specific to least specific):
+        // 1. Specific post_type AND specific category_id
+        // 2. Specific post_type AND any category (category_id is null/empty)
+        // 3. Any post_type AND specific category_id
+        // 4. Global rule (no post_type and no category_id)
+
         $settings = Settings::where('key', 'voting_rules')->get();
 
-        // Look for a specific rule for this post type and category
+        // First, look for a specific rule for this post type and category (highest priority)
         foreach ($settings as $setting) {
             $value = $setting->value;
-
-            // Check if this setting applies to specific post type and category
             if (
                 isset($value['post_type']) && $value['post_type'] === $post->post_type &&
                 isset($value['category_id']) && $value['category_id'] == $post->category_id
             ) {
                 return array_merge($this->getDefaultVotingRule(), $value);
             }
+        }
 
-            // Check if this setting applies to specific post type and all categories
+        // Second, look for a rule for this post type and all categories
+        foreach ($settings as $setting) {
+            $value = $setting->value;
             if (
                 isset($value['post_type']) && $value['post_type'] === $post->post_type &&
-                !isset($value['category_id'])
+                (!isset($value['category_id']) || empty($value['category_id']))
             ) {
                 return array_merge($this->getDefaultVotingRule(), $value);
             }
+        }
 
-            // Check if this setting applies to specific category and all post types
+        // Third, look for a rule for this category and all post types
+        foreach ($settings as $setting) {
+            $value = $setting->value;
             if (
-                !isset($value['post_type']) &&
+                (!isset($value['post_type']) || empty($value['post_type'])) &&
                 isset($value['category_id']) && $value['category_id'] == $post->category_id
             ) {
                 return array_merge($this->getDefaultVotingRule(), $value);
@@ -171,19 +181,14 @@ class VotingController extends Controller
         }
 
         // Finally, check for global rule (no post_type and no category_id)
-        $globalRule = Settings::where('key', 'voting_rules')
-            ->where(function ($query) {
-                $query->whereNull('value->post_type')
-                    ->orWhere('value->post_type', '');
-            })
-            ->where(function ($query) {
-                $query->whereNull('value->category_id')
-                    ->orWhere('value->category_id', '');
-            })
-            ->first();
-
-        if ($globalRule) {
-            return array_merge($this->getDefaultVotingRule(), $globalRule->value);
+        foreach ($settings as $setting) {
+            $value = $setting->value;
+            if (
+                (!isset($value['post_type']) || empty($value['post_type'])) &&
+                (!isset($value['category_id']) || empty($value['category_id']))
+            ) {
+                return array_merge($this->getDefaultVotingRule(), $value);
+            }
         }
 
         // Use default rules if no matching rule found

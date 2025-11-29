@@ -25,6 +25,14 @@ class Settings extends Model
     }
 
     /**
+     * Get all settings by key
+     */
+    public static function getAll($key)
+    {
+        return static::where('key', $key)->get();
+    }
+
+    /**
      * Set a setting value by key
      */
     public static function set($key, $value)
@@ -33,6 +41,17 @@ class Settings extends Model
             ['key' => $key],
             ['value' => $value]
         );
+    }
+
+    /**
+     * Set multiple settings for the same key
+     */
+    public static function add($key, $value)
+    {
+        return static::create([
+            'key' => $key,
+            'value' => $value
+        ]);
     }
 
     /**

@@ -35,13 +35,99 @@ class SettingForm
                         ->label('Post Type')
                         ->options(CustomPostType::pluck('singular_label', 'slug')->toArray())
                         ->helperText('Select the post type to configure (leave empty for all post types)')
-                        ->nullable(),
+                        ->nullable()
+                        ->reactive() // Make it reactive so the form updates based on selection
+                        ->dehydrated(fn($state) => !empty($state)) // Only save if there's a value
+                        ->rule(
+                            fn($get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                // Skip validation for existing records being updated
+                                $record = request()->route('record')?->id;
+
+                                // Check if a similar configuration already exists
+                                $key = $get('key');
+                                $categoryId = $get('value.category_id');
+
+                                if ($key && ($value || $categoryId)) {
+                                    $query = \App\Models\Settings::where('key', $key);
+
+                                    if ($value) { // post_type is set
+                                        $query->where('value->post_type', $value);
+                                    } else { // post_type is not set (null/empty)
+                                        $query->where(function ($q) {
+                                            $q->whereNull('value->post_type')
+                                                ->orWhere('value->post_type', '');
+                                        });
+                                    }
+
+                                    if ($categoryId) { // category_id is set
+                                        $query->where('value->category_id', $categoryId);
+                                    } else { // category_id is not set (null/empty)
+                                        $query->where(function ($q) {
+                                            $q->whereNull('value->category_id')
+                                                ->orWhere('value->category_id', '');
+                                        });
+                                    }
+
+                                    // Exclude the current record if updating
+                                    if ($record) {
+                                        $query->where('id', '!=', $record);
+                                    }
+
+                                    if ($query->exists()) {
+                                        $fail('A configuration with this key, post type, and category combination already exists.');
+                                    }
+                                }
+                            }
+                        ),
 
                     Select::make('value.category_id')
                         ->label('Category')
                         ->options(Category::pluck('name', 'id')->toArray())
                         ->nullable()
-                        ->helperText('Select the category to configure (leave empty for all categories)'),
+                        ->helperText('Select the category to configure (leave empty for all categories)')
+                        ->reactive() // Make it reactive so the form updates based on selection
+                        ->dehydrated(fn($state) => !empty($state)) // Only save if there's a value
+                        ->rule(
+                            fn($get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                // Skip validation for existing records being updated
+                                $record = request()->route('record')?->id;
+
+                                // Check if a similar configuration already exists
+                                $key = $get('key');
+                                $postType = $get('value.post_type');
+
+                                if ($key && ($postType || $value)) {
+                                    $query = \App\Models\Settings::where('key', $key);
+
+                                    if ($postType) { // post_type is set
+                                        $query->where('value->post_type', $postType);
+                                    } else { // post_type is not set (null/empty)
+                                        $query->where(function ($q) {
+                                            $q->whereNull('value->post_type')
+                                                ->orWhere('value->post_type', '');
+                                        });
+                                    }
+
+                                    if ($value) { // category_id is set
+                                        $query->where('value->category_id', $value);
+                                    } else { // category_id is not set (null/empty)
+                                        $query->where(function ($q) {
+                                            $q->whereNull('value->category_id')
+                                                ->orWhere('value->category_id', '');
+                                        });
+                                    }
+
+                                    // Exclude the current record if updating
+                                    if ($record) {
+                                        $query->where('id', '!=', $record);
+                                    }
+
+                                    if ($query->exists()) {
+                                        $fail('A configuration with this key, post type, and category combination already exists.');
+                                    }
+                                }
+                            }
+                        ),
 
                     TextInput::make('value.max_actions_per_post')
                         ->label('Max actions per post')
