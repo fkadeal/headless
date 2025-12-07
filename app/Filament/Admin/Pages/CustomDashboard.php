@@ -21,7 +21,7 @@ class CustomDashboard extends Page
     public function getHeaderWidgets(): array
     {
         return [
-             \App\Filament\Admin\Widgets\CustomStatsOverview::class,
+            \App\Filament\Admin\Widgets\CustomStatsOverview::class,
         ];
     }
 
@@ -32,5 +32,4 @@ class CustomDashboard extends Page
             \App\Filament\Admin\Widgets\TopVotedPostsChart::class,
         ];
     }
-
 }

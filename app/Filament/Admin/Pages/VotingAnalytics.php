@@ -6,6 +6,7 @@ use Filament\Pages\Page;
 use Filament\Widgets\Widget;
 use App\Filament\Admin\Widgets\VotingAnalyticsChart;
 use App\Filament\Admin\Widgets\TopVotedPostsChart;
+use App\Filament\Admin\Widgets\VotesPerCategory;
 use BackedEnum;
 
 class VotingAnalytics extends Page
@@ -23,6 +24,7 @@ class VotingAnalytics extends Page
         return [
             VotingAnalyticsChart::class,
             TopVotedPostsChart::class,
+            VotesPerCategory::class,
         ];
     }
 
