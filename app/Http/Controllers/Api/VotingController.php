@@ -18,6 +18,11 @@ class VotingController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        return response()->json([
+                    'success' => false,
+                    'message' =>   'The Voting has ended . Thank you for your vote.',
+                ], Response::HTTP_CONFLICT);
+
         $validator = Validator::make($request->all(), [
             'post_id' => 'required|exists:posts,id',
         ]);
