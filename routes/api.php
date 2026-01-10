@@ -61,4 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Voting management
     Route::post('/votes', [VotingController::class, 'store']);
     Route::get('/posts/{post}/votes', [VotingController::class, 'showByPost']);
+
+    // Admin functionality
+    Route::post('/admin/update-nominee-votes', [\App\Http\Controllers\Api\V1\AdminController::class, 'updateNomineeVoteCounts']);
 });

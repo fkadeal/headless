@@ -82,10 +82,38 @@ class PostController extends Controller
      */
     protected function applySorting($query, $sort)
     {
+        $driver = config('database.default');
+
         foreach (explode(',', $sort) as $sortItem) {
             $direction = str_starts_with($sortItem, '-') ? 'desc' : 'asc';
             $field = ltrim($sortItem, '-');
-            $query->orderBy($field, $direction);
+
+            if (str_starts_with($field, 'meta_data.')) {
+                $jsonKey = last(explode('.', $field)); // Get the actual key, e.g., 'vote_count'
+
+                switch ($driver) {
+                    case 'mysql':
+                    case 'mariadb':
+                        // CAST to UNSIGNED for numeric sorting, handles null/missing keys as 0
+                        $query->orderByRaw('CAST(JSON_EXTRACT(meta_data, "$.' . $jsonKey . '") AS UNSIGNED) ' . $direction);
+                        break;
+                    case 'pgsql':
+                        // Cast to integer for numeric sorting, handles null/missing keys as NULL
+                        $query->orderByRaw("(meta_data->>'" . $jsonKey . "')::integer " . $direction);
+                        break;
+                    case 'sqlite':
+                        // JSON_EXTRACT returns NULL for missing keys or null meta_data. Cast to integer for sorting.
+                        $query->orderByRaw('CAST(JSON_EXTRACT(meta_data, "$.' . $jsonKey . '") AS INTEGER) ' . $direction);
+                        break;
+                    default:
+                        // Fallback: This will likely not sort correctly for JSON fields on unsupported databases
+                        Log::warning("Attempted to sort by JSON field '{$field}' on unsupported database driver '{$driver}'. Falling back to standard orderBy.");
+                        $query->orderBy($field, $direction);
+                        break;
+                }
+            } else {
+                $query->orderBy($field, $direction);
+            }
         }
     }
 
