@@ -36,11 +36,15 @@ class PostForm
 
             \Filament\Forms\Components\Select::make('category_id')
                 ->relationship('category', 'name')
+                ->searchable()
+                ->preload()
                 ->nullable()
                 ->label('Category'),
 
             \Filament\Forms\Components\Select::make('created_by')
                 ->relationship('author', 'name')
+                ->searchable()
+                ->preload()
                 ->required()
                 ->label('Author'),
 
