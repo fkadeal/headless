@@ -98,8 +98,8 @@ class PostController extends Controller
                         $query->orderByRaw('CAST(JSON_EXTRACT(meta_data, "$.' . $jsonKey . '") AS UNSIGNED) ' . $direction);
                         break;
                     case 'pgsql':
-                        // Cast to integer for numeric sorting, handles null/missing keys as NULL
-                        $query->orderByRaw("(meta_data->>'" . $jsonKey . "')::integer " . $direction);
+                        // Cast to jsonb first, then extract as text, then cast to integer for numeric sorting
+                        $query->orderByRaw("(meta_data::jsonb->>'" . $jsonKey . "')::integer " . $direction);
                         break;
                     case 'sqlite':
                         // JSON_EXTRACT returns NULL for missing keys or null meta_data. Cast to integer for sorting.
