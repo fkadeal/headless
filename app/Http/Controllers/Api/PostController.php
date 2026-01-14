@@ -17,7 +17,7 @@ class PostController extends Controller
     public function index(Request $request): JsonResponse
     {
  
-        $query = Post::with(['category', 'author', 'tags']);
+        $query = Post::with(['category', 'author', 'tags', 'images']);
            
         
         // Apply filters if present
@@ -158,7 +158,7 @@ class PostController extends Controller
      */
     public function show(Post $post): JsonResponse
     {
-        $post->load(['category', 'author', 'tags']);
+        $post->load(['category', 'author', 'tags', 'images']);
 
         // Add vote count to the post data
         $post->vote_count = $post->votes()->count();

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\PostMeta;
 use App\Models\Voting;
 use App\Traits\Filterable;
@@ -23,6 +24,7 @@ class Post extends Model
         'category_id',
         'created_by',
         'is_published',
+        'is_active',
         'published_at',
         'featured_image',
         'meta_data',
@@ -33,6 +35,7 @@ class Post extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'is_published' => 'boolean',
+        'is_active' => 'boolean',
         'meta_data' => 'array',
         'post_type' => 'string',
     ];
@@ -129,5 +132,10 @@ class Post extends Model
     public function hasIpVoted($ipAddress)
     {
         return $this->votes()->where('ip_address', $ipAddress)->exists();
+    }
+
+    public function images(): MorphMany
+    {
+        return $this->morphMany(Image::class, 'imageable')->orderBy('order');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Posts\Schemas;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use Filament\Forms\Components\Repeater;
 
 class PostForm
 {
@@ -62,12 +63,25 @@ class PostForm
                 ->fileAttachmentsDirectory('uploads')
                 ->required(),
 
-            \Filament\Forms\Components\FileUpload::make('thumbnail')
-                ->image()
-                ->disk('public')
-                ->directory('thumbnails')
-                ->nullable()
-                ->label('Thumbnail'),
+            \Filament\Forms\Components\Repeater::make('images')
+                ->relationship()
+                ->schema([
+                    \Filament\Forms\Components\FileUpload::make('path')
+                        ->image()
+                        ->disk('public')
+                        ->directory('post-images')
+                        ->required()
+                        ->label('Image Path'),
+                    \Filament\Forms\Components\TextInput::make('order')
+                        ->numeric()
+                        ->default(0)
+                        ->label('Order'),
+                ])
+                ->defaultItems(1)
+                ->collapsible()
+                ->itemLabel(fn (array $state): ?string => $state['path'] ?? null)
+                ->columnSpanFull()
+                ->label('Post Images'),
         ];
     }
 }
