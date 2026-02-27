@@ -31,6 +31,11 @@ class Tag extends Model
         return $this->belongsToMany(Post::class, 'post_tag');
     }
 
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_tag');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

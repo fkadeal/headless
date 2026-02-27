@@ -9,33 +9,35 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        // Drop the existing unique index on the 'key' column
-        Schema::table('settings', function (Blueprint $table) {
-            $table->dropUnique(['key']); // This removes the unique constraint on 'key'
-        });
+public function up(): void
+{
+    Schema::table('settings', function (Blueprint $table) {
+        $table->dropUnique(['key']);
+    });
 
-        // Add a new unique index on key + value->post_type + value->category_id
-        // This prevents duplicate configurations for the same key, post_type, and category_id combination
+    if (Schema::getConnection()->getDriverName() === 'mysql') {
         Schema::table('settings', function (Blueprint $table) {
-            $table->unique(['key', 'value->post_type', 'value->category_id'], 'settings_key_posttype_category_unique');
+            $table->unique(
+                ['key', 'value->post_type', 'value->category_id'],
+                'settings_key_posttype_category_unique'
+            );
         });
     }
+}
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
-    {
-        // Drop the unique constraint we added
+{
+    if (Schema::getConnection()->getDriverName() === 'mysql') {
         Schema::table('settings', function (Blueprint $table) {
             $table->dropUnique('settings_key_posttype_category_unique');
         });
-
-        // Re-add the unique constraint on the 'key' column
-        Schema::table('settings', function (Blueprint $table) {
-            $table->unique(['key']);
-        });
     }
+
+    Schema::table('settings', function (Blueprint $table) {
+        $table->unique(['key']);
+    });
+}
 };

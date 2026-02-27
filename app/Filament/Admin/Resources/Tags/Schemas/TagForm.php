@@ -26,6 +26,12 @@ class TagForm
                 ->relationship('creator', 'name')
                 ->required()
                 ->label('Created By'),
+
+            \Filament\Forms\Components\Select::make('categories')
+                ->multiple()
+                ->relationship('categories', 'name')
+                ->preload()
+                ->label('Categories'),
         ];
     }
 }

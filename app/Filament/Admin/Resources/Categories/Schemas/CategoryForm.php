@@ -6,6 +6,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 
 class CategoryForm
 {
@@ -43,12 +45,21 @@ class CategoryForm
                 ->label('Is Active')
                 ->default(true),
 
-            \Filament\Forms\Components\FileUpload::make('thumbnail')
+            FileUpload::make('thumbnail')
                 ->image()
                 ->disk('public')
                 ->directory('thumbnails')
                 ->nullable()
                 ->label('Thumbnail'),
+
+            Select::make('tags')
+                ->multiple()
+                ->relationship('tags', 'name')
+                ->preload()
+                ->label('Tags'),
+            DateTimePicker::make('created_at')
+                ->label('Date')
+            
         ];
     }
 }
