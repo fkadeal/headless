@@ -30,6 +30,7 @@ class Post extends Model
         'meta_data',
         'thumbnail',
         'post_type',
+        'created_at',
     ];
 
     protected $casts = [

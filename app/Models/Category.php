@@ -63,13 +63,13 @@ class Category extends Model
     }
 
     protected static function booted()
-{
-    static::creating(function ($category) {
-        if (empty($category->created_by)) {
-            $category->created_by = auth()->id();
-        }
-    });
-}
+    {
+        static::creating(function ($category) {
+            if (empty($category->created_by)) {
+                $category->created_by = auth()->id();
+            }
+        });
+    }
 
     /**
      * Get all votes for posts in this category

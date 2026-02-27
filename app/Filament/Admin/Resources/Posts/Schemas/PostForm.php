@@ -4,6 +4,8 @@ namespace App\Filament\Admin\Resources\Posts\Schemas;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\DateTimePicker;
+
 
 class PostForm
 {
@@ -79,9 +81,11 @@ class PostForm
                 ])
                 ->defaultItems(1)
                 ->collapsible()
-                ->itemLabel(fn (array $state): ?string => $state['path'] ?? null)
+                ->itemLabel(fn(array $state): ?string => $state['path'] ?? null)
                 ->columnSpanFull()
                 ->label('Post Images'),
+            DateTimePicker::make('created_at')
+                ->label('Date')
         ];
     }
 }
