@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources\Posts\Schemas;
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\DateTimePicker;
+use \Filament\Forms\Components\Select;
 
 
 class PostForm
@@ -37,14 +38,14 @@ class PostForm
 
 
 
-            \Filament\Forms\Components\Select::make('category_id')
+            Select::make('category_id')
                 ->relationship('category', 'name')
                 ->searchable()
                 ->preload()
                 ->nullable()
                 ->label('Category'),
 
-            \Filament\Forms\Components\Select::make('created_by')
+            Select::make('created_by')
                 ->relationship('author', 'name')
                 ->searchable()
                 ->preload()
@@ -84,6 +85,13 @@ class PostForm
                 ->itemLabel(fn(array $state): ?string => $state['path'] ?? null)
                 ->columnSpanFull()
                 ->label('Post Images'),
+            Select::make('tags')
+                ->relationship('tags', 'name')
+                ->searchable()
+                ->preload()
+                ->multiple()
+                ->required()
+                ->label('Tags'),
             DateTimePicker::make('created_at')
                 ->label('Date')
         ];
