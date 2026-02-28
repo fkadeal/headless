@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Builder;
 trait Filterable
 {
     /**
+     * Supported operators for filtering.
+     */
+    protected $operators = ['eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'contains', 'in', 'nin'];
+
+    /**
      * Scope a query to apply filters based on the request.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -15,16 +20,14 @@ trait Filterable
      */
     public function scopeFilter($query, array $filters)
     {
-        foreach ($filters as $field => $ops) {
+        foreach ($filters as $field => $data) {
             // Handle OR group
             if ($field === 'or') {
-                $query->where(function($q) use ($ops) {
-                    foreach ($ops as $index => $condition) {
-                        $q->where(function($subQuery) use ($condition) {
-                            foreach ($condition as $f => $condOps) {
-                                foreach ($condOps as $op => $value) {
-                                    $this->applyFilter($subQuery, $f, $op, $value, 'or');
-                                }
+                $query->where(function ($q) use ($data) {
+                    foreach ($data as $index => $condition) {
+                        $q->where(function ($subQuery) use ($condition) {
+                            foreach ($condition as $f => $condData) {
+                                $this->scopeFilter($subQuery, [$f => $condData], 'or');
                             }
                         });
                     }
@@ -34,23 +37,39 @@ trait Filterable
 
             // Handle search parameter
             if ($field === 'search') {
-                $this->applySearchFilter($query, $ops);
+                $this->applySearchFilter($query, $data);
                 continue;
             }
 
             // Handle sorting
             if ($field === 'sort') {
-                $this->applySorting($query, $ops);
+                $this->applySorting($query, $data);
                 continue;
             }
 
+            // If it's not an array, default to eq operator
+            if (!is_array($data)) {
+                $data = ['eq' => $data];
+            }
+
             // Handle normal filters
-            foreach ($ops as $op => $value) {
-                // Check if field is a relation (contains dot notation)
-                if (strpos($field, '.') !== false) {
-                    $this->applyRelationFilter($query, $field, $op, $value);
+            foreach ($data as $key => $value) {
+                if (in_array($key, $this->operators)) {
+                    // It's an operator, apply the filter
+                    $op = $key;
+                    // Check if field is a relation (contains dot notation)
+                    if (strpos($field, '.') !== false) {
+                        $this->applyRelationFilter($query, $field, $op, $value);
+                    } elseif (method_exists($this, $field) && !in_array($field, $this->getFillable())) {
+                        // If field is a method but not fillable, treat as relation
+                        // Filter by relation's primary key (usually 'id')
+                        $this->applyRelationFilter($query, $field . '.id', $op, $value);
+                    } else {
+                        $this->applyFilter($query, $field, $op, $value);
+                    }
                 } else {
-                    $this->applyFilter($query, $field, $op, $value);
+                    // It's a nested field, recurse using dot notation
+                    $this->scopeFilter($query, ["$field.$key" => $value]);
                 }
             }
         }
@@ -70,6 +89,12 @@ trait Filterable
      */
     protected function applyFilter($query, $field, $op, $value, $boolean = 'and')
     {
+        // Qualify field name with table name to avoid ambiguity in subqueries (e.g. Postgres whereHas)
+        if (strpos($field, '.') === false) {
+            $table = $query->getModel()->getTable();
+            $field = "{$table}.{$field}";
+        }
+
         $method = match ($op) {
             'eq' => 'where',
             'ne' => 'whereNot',
@@ -115,6 +140,11 @@ trait Filterable
         $field = $parts[1];
 
         return $query->whereHas($relation, function ($q) use ($field, $op, $value) {
+            // If field still has dots, it's a nested relation
+            if (strpos($field, '.') !== false) {
+                return $this->applyRelationFilter($q, $field, $op, $value);
+            }
+            // Otherwise, it's a column on the related model
             $this->applyFilter($q, $field, $op, $value);
         });
     }
@@ -131,12 +161,12 @@ trait Filterable
         $query->where(function ($q) use ($search) {
             // Get the model's fillable fields to search in
             $searchableFields = $this->getSearchableFields();
-            
+
             foreach ($searchableFields as $field) {
                 $q->orWhere($field, 'LIKE', "%$search%");
             }
         });
-        
+
         return $query;
     }
 

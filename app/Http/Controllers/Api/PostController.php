@@ -7,6 +7,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -16,10 +17,10 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
- 
+
         $query = Post::with(['category', 'author', 'tags', 'images']);
-           
-        
+
+
         // Apply filters if present
         $filters = $request->query('filters', []);
         if (!empty($filters)) {
@@ -28,14 +29,14 @@ class PostController extends Controller
             // Maintain existing behavior for backward compatibility
             $query->when($request->search, function ($q, $search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%");
+                    ->orWhere('content', 'like', "%{$search}%");
             })
-            ->when($request->category, function ($q, $category) {
-                $q->where('category_id', $category);
-            })
-            ->when($request->published, function ($q) {
-                $q->where('is_published', true);
-            });
+                ->when($request->category, function ($q, $category) {
+                    $q->where('category_id', $category);
+                })
+                ->when($request->published, function ($q) {
+                    $q->where('is_published', true);
+                });
         }
 
         // Apply sorting if present in filters or as query param
@@ -51,7 +52,7 @@ class PostController extends Controller
         // Capture the authenticated user ID before transformation 
         $user = auth('sanctum')->user();
         $userId = optional($user)->id;
-        
+
         // Add vote count and has_voted status to each post
         $posts->getCollection()->transform(function ($post) use ($userId) {
             $post->vote_count = $post->votes()->count();
