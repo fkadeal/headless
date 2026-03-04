@@ -91,7 +91,14 @@ trait Filterable
     {
         // Qualify field name with table name to avoid ambiguity in subqueries (e.g. Postgres whereHas)
         if (strpos($field, '.') === false) {
-            $table = $query->getModel()->getTable();
+            $model = $query->getModel();
+            $table = $model->getTable();
+
+            // Check if column exists
+            if (!\Illuminate\Support\Facades\Schema::hasColumn($table, $field)) {
+                abort(400, "Filter error: Column '{$field}' not found on model '" . get_class($model) . "'.");
+            }
+
             $field = "{$table}.{$field}";
         }
 
@@ -138,6 +145,11 @@ trait Filterable
         $parts = explode('.', $field, 2);
         $relation = $parts[0];
         $field = $parts[1];
+
+        $model = $query->getModel();
+        if (!method_exists($model, $relation)) {
+            abort(400, "Filter error: Relationship '{$relation}' not found on model '" . get_class($model) . "'.");
+        }
 
         return $query->whereHas($relation, function ($q) use ($field, $op, $value) {
             // If field still has dots, it's a nested relation
