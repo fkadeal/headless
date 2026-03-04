@@ -93,9 +93,10 @@ trait Filterable
         if (strpos($field, '.') === false) {
             $model = $query->getModel();
             $table = $model->getTable();
+            $baseTable = (new (get_class($model)))->getTable();
 
-            // Check if column exists
-            if (!\Illuminate\Support\Facades\Schema::hasColumn($table, $field)) {
+            // Check if column exists on the base table
+            if (!$model->getConnection()->getSchemaBuilder()->hasColumn($baseTable, $field)) {
                 abort(400, "Filter error: Column '{$field}' not found on model '" . get_class($model) . "'.");
             }
 
