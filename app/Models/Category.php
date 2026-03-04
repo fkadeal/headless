@@ -83,4 +83,9 @@ class Category extends Model
     {
         return $this->morphMany(Image::class, 'imageable')->orderBy('order');
     }
+
+    public function customPostTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(CustomPostType::class, 'category_custom_post_type');
+    }
 }

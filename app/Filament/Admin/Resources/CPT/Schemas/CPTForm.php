@@ -89,7 +89,7 @@ class CPTForm
 
                     // Set defaults and hide fields if required but not explicitly included in custom config
                     if ($fieldKey === 'category_id' && (!in_array('category_id', $customPostType->standard_fields ?? []))) {
-                        $defaultCategory = Category::first();
+                        $defaultCategory = $customPostType?->categories()->first() ?? Category::first();
                         $field = $field->default($record?->category_id ?? $defaultCategory?->id)->hidden();
                     }
 
@@ -139,7 +139,21 @@ class CPTForm
             'featured_image' => fn() => FileUpload::make('featured_image')->image()->disk('public')->directory('featured-images')->visibility('public')->helperText('Featured image for the post')->columnSpanFull(),
             'thumbnail' => fn() => FileUpload::make('thumbnail')->image()->disk('public')->directory('thumbnails')->nullable()->visibility('public')->helperText('Thumbnail image for the post')->columnSpanFull(),
             'is_published' => fn() => Toggle::make('is_published')->label('Published')->helperText('Set to publish this post'),
-            'category_id' => fn() => Select::make('category_id')->options(Category::pluck('name', 'id'))->nullable()->searchable()->helperText('Select a category for this post'),
+            'category_id' => function () {
+                $postType = CurrentCPT::get();
+                $customPostType = $postType ? CustomPostType::where('slug', $postType)->with('categories')->first() : null;
+
+                $query = Category::query();
+                if ($customPostType && $customPostType->categories()->exists()) {
+                    $query->whereIn('id', $customPostType->categories->pluck('id'));
+                }
+
+                return Select::make('category_id')
+                    ->options($query->pluck('name', 'id'))
+                    ->nullable()
+                    ->searchable()
+                    ->helperText('Select a category for this post');
+            },
             'created_by' => fn() => Select::make('created_by')->options(User::pluck('name', 'id'))->default(Auth::id())->nullable()->searchable()->helperText('Select the author for this post (defaults to current user)'),
             'is_active' => fn() => Toggle::make('is_active')->label('Is Active')->helperText('Set to activate this post'),
         ];

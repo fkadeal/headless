@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\VotingController;
+use App\Http\Controllers\Api\CustomPostTypeController;
 
 // API Authentication Routes
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
@@ -34,6 +35,10 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/tags/{tag}', [TagController::class, 'show']);
 
+// Custom Post Type Routes
+Route::get('/post-types', [CustomPostTypeController::class, 'index']);
+Route::get('/post-types/{customPostType}', [CustomPostTypeController::class, 'show']);
+
 // Public Voting Routes (no authentication required for checking votes)
 Route::get('/posts/{post}/vote-status', [VotingController::class, 'checkVoteStatus']);
 Route::get('/posts/{post}/vote-count', [VotingController::class, 'getVoteCount']);
@@ -45,13 +50,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/posts/{post}', [PostController::class, 'update']);
     Route::patch('/posts/{post}', [PostController::class, 'update']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
-    
+
     // Category management
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);
     Route::patch('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
-    
+
     // Tag management
     Route::post('/tags', [TagController::class, 'store']);
     Route::put('/tags/{tag}', [TagController::class, 'update']);

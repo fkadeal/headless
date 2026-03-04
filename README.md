@@ -10,13 +10,14 @@ A Laravel-based headless CMS with Filament admin panel. This project provides bo
 
 - **API-First Architecture**: Full REST API for managing content
 - **Admin Panel**: Intuitive Filament-based content management
-- **Content Types**: Posts, Categories, and Tags with relationships
+- **Content Types**: Posts, Categories, Tags, and Custom Post Types with relationships
 - **Authentication**: Token-based API authentication with Sanctum
 - **Flexible**: Easy to extend and customize for your needs
 
 ## Quick Start
 
 ### Prerequisites
+
 - PHP 8.2+
 - Composer
 - Database (SQLite, MySQL, PostgreSQL)
@@ -24,51 +25,59 @@ A Laravel-based headless CMS with Filament admin panel. This project provides bo
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/fkadeal/headless.git
-cd headless
-```
+   ```bash
+   git clone https://github.com/fkadeal/headless.git
+   cd headless
+   ```
 
 2. Install dependencies:
-```bash
-composer install
-npm install
-```
+   ```bash
+   composer install
+   npm install
+   ```
 
 3. Set up environment:
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
 4. Configure your database in `.env` file
 
 5. Run migrations:
-```bash
-php artisan migrate
-```
+   ```bash
+   php artisan migrate
+   ```
 
 6. Start the development server:
-```bash
-php artisan serve
-```
+   ```bash
+   php artisan serve
+   ```
 
 ## API Documentation
 
 The CMS provides a comprehensive API for managing content:
 
 ### Authentication
+
 - `POST /api/login` - Get API token
 - `POST /api/logout` - Revoke token
 
 ### Content Management
-- `GET /api/posts` - List posts
+
+- `GET /api/posts` - List posts with advanced filtering and pagination
 - `POST /api/posts` - Create post (auth required)
 - `GET /api/posts/{id}` - Get single post
 - `PUT/PATCH /api/posts/{id}` - Update post (auth required)
 - `DELETE /api/posts/{id}` - Delete post (auth required)
 
 Similar endpoints are available for categories and tags.
+
+### Custom Post Types
+
+- `GET /api/post-types` - List custom post types with advanced filtering and pagination
+  - Support query params: `search`, `category`, `enabled`, `per_page`
+- `GET /api/post-types/{slug_or_id}` - Get single post type details
 
 ## Admin Panel
 
@@ -77,14 +86,18 @@ Access the admin panel at `/admin` to manage your content through an intuitive i
 ## Architecture
 
 ### Models
+
 - **Post**: Content with title, slug, content, excerpt, category, tags, publishing status
 - **Category**: Hierarchical categories for organizing content
 - **Tag**: For content tagging and filtering
+- **CustomPostType**: Dynamic post types with category associations
 
 ### Relationships
+
 - Posts belong to Categories
 - Posts have many Tags (many-to-many)
 - Categories can be hierarchical (parent-child)
+- CustomPostTypes have many Categories (many-to-many)
 
 ## Documentation
 

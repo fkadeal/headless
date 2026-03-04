@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Post;
+use App\Traits\Filterable;
 
 class CustomPostType extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Filterable;
 
     protected $fillable = [
         'name',
@@ -19,6 +20,13 @@ class CustomPostType extends Model
         'standard_fields',
         'enabled',
         'menu_order',
+    ];
+
+    protected $searchable = [
+        'name',
+        'slug',
+        'singular_label',
+        'plural_label',
     ];
 
     protected $casts = [
@@ -34,5 +42,10 @@ class CustomPostType extends Model
     public function posts()
     {
         return $this->hasMany(Post::class)->where('post_type', $this->slug);
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_custom_post_type');
     }
 }

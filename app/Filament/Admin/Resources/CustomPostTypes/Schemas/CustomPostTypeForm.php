@@ -58,10 +58,18 @@ class CustomPostTypeForm
                                 'featured_image' => 'Featured Image',
                                 'thumbnail' => 'Thumbnail',
                                 'is_published' => 'Published Status',
-                                'category_id' => 'Category',
+                                'category_id' => 'Category (Single Select)',
+                                'tags' => 'Tags (Multi Select)',
                             ])
-                            ->default(['title', 'slug', 'content', 'is_published'])
+                            ->default(['title', 'slug', 'content', 'is_published', 'category_id'])
                             ->helperText('Select standard post fields to include in this post type'),
+
+                        Select::make('categories')
+                            ->relationship('categories', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->helperText('Select categories that will be available for this post type. If none are selected, all categories will be available.'),
                     ]),
 
                 Section::make('Custom Fields Configuration')
@@ -107,7 +115,7 @@ class CustomPostTypeForm
                                             ->required()
                                             ->helperText('Option value'),
                                     ])
-                                    ->visible(fn ($get) => in_array($get('../../type'), ['select']))
+                                    ->visible(fn($get) => in_array($get('../../type'), ['select']))
                                     ->helperText('Field options for select fields'),
                             ])
                             ->helperText('Configure custom fields that will appear when creating content for this post type'),

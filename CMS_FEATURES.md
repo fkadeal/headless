@@ -42,6 +42,12 @@ This document outlines the CMS features implemented in the headless CMS applicat
 - `tag_id`: Foreign key to tags table (constrained, cascade delete)
 - `timestamps`: created_at and updated_at
 
+### Category-CustomPostType Pivot Table
+- `id`: Primary key
+- `category_id`: Foreign key to categories table (constrained, cascade delete)
+- `custom_post_type_id`: Foreign key to custom_post_types table (constrained, cascade delete)
+- `timestamps`: created_at and updated_at
+
 ## API Endpoints
 
 ### Public Endpoints (No Authentication Required)
@@ -57,6 +63,10 @@ This document outlines the CMS features implemented in the headless CMS applicat
   - Query params: `search`, `per_page`
   - Advanced filtering: `filters[field][operator]=value`
 - `GET /api/tags/{tag}` - Get single tag with relationships
+- `GET /api/post-types` - List enabled custom post types with advanced filtering and pagination
+  - Query params: `search`, `category`, `enabled`, `per_page`
+  - Advanced filtering: `filters[field][operator]=value`
+- `GET /api/post-types/{custom_post_type}` - Get single custom post type by slug or ID
 
 ### Protected Endpoints (Authentication Required)
 - `POST /api/posts` - Create new post
@@ -87,10 +97,15 @@ This document outlines the CMS features implemented in the headless CMS applicat
 - `parent()`: BelongsTo relationship to Category (self-referencing)
 - `children()`: HasMany relationship to Category (self-referencing)
 - `creator()`: BelongsTo relationship to User (via created_by)
+- `customPostTypes()`: BelongsToMany relationship to CustomPostType
 
 ### Tag Model
 - `posts()`: BelongsToMany relationship to Post (via post_tag pivot)
 - `creator()`: BelongsTo relationship to User (via created_by)
+
+### CustomPostType Model
+- `posts()`: HasMany relationship to Post
+- `categories()`: BelongsToMany relationship to Category
 
 ## Filament Admin Panel
 
@@ -141,6 +156,12 @@ The API supports advanced filtering through a flexible query syntax:
 Use a filters object in the query string:
 ```
 GET /posts?filters[field][operator]=value
+```
+
+It also works for categories, tags, and custom post types:
+
+```
+GET /post-types?filters[name][contains]=Video
 ```
 
 ### Supported Operators
@@ -226,6 +247,9 @@ curl "http://localhost:8000/api/posts?filters[category][slug][eq]=tech"
 
 # Get posts with search and sorting
 curl "http://localhost:8000/api/posts?filters[search]=laravel&sort=-created_at"
+
+# Get custom post types with filtering
+curl "http://localhost:8000/api/post-types?filters[name][contains]=Video"
 ```
 
 ### Admin Panel
